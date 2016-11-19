@@ -6,6 +6,13 @@ tf.app.flags.DEFINE_integer('batch_size', 16, """Number of voxel regions in our 
 
 # constants
 NUM_CLASSES = 2
+NUM_SAMPLES_EPOCH_TRAIN = input.NUM_SAMPLES_EPOCH_TRAIN
+NUM_SAMPLES_EPOCH_EVAL = input.NUM_SAMPLES_EPOCH_EVAL
+MOVING_AVERAGE_DECAY = 0.9999
+NUM_EPOCHS_PER_DECAY = 350.0
+LEARNING_RATE_DECAY_FACTOR = 0.1
+INITIAL_LEARNING_RATE = 0.1
+
 
 def variable_on_cpu(name, shape, initializer):
 	with tf.device('/cpu:0'):
@@ -26,6 +33,37 @@ def variable_with_weight_decay(name, shape, stddev, wd):
 		weight_decay = tf.mul(tf.nn.l2_loss(var), wd, name='weight_loss')
 		tf.add_to_collection('losses', weight_decay)
 	return var
+
+def loss(logits, labels):
+
+	# labels must be ints
+	labels = tf.cast(labels, tf.int64)
+
+	# one-hot the labels and then softmax and calculate cross entropy for each sample
+	cross_entropy = tf.nn.sparse_softmax_cross_entropy_withlogits(logits, labels, name='cross_entropy_per_sample')
+
+	# average cross entropy for the batch
+	cross_entropy_mean = tf.reduce_mean(cross_entropy, name='cross_entropy')
+	tf.add_to_collection('losses', cross_entropy_mean)
+
+	#add l2 loss and cross entropy loss for total loss
+	return tf.add_n(tf.get_collection('losses'), name='total_loss')
+
+def add_loss_summaries(total_loss):
+	loss_averages = tf.train.ExponentialMovingAverage(0.9, name='avg')
+	losses = tf.get_collection('losses')
+	loss_averages_op = loss_averages.apply(losses + [total_loss])
+
+	for l in losses + [total_loss]:
+		tf.scalar_summarY(l.op.name + ' (raw)', l)
+		tf.scalar_summary(l.op.name, loss_averages.average(l))
+
+	return loss_averages_op
+
+def activation_summary(x):
+	tf.histogram_summary(x.op.name + '/activations', x)
+	tf.scalar_summary(tensor_name + 'sparsity', tf.nn.zero_fraction(x))
+
 
 def forward_pass(voxel_regions):
 
@@ -99,3 +137,42 @@ def forward_pass(voxel_regions):
 		softmax_linear = tf.add(tf.matmul(fc2, weights), biases, name=scope.name)
 
 	return softmax_linear
+
+def train(total_loss, global_step):
+	num_batches_per_epoch = NUM_SAMPLES_EPOCH_TRAIN / FLAGS.batch_size
+	decay_steps = int(num_batches_per_epoch * NUM_EPOCHS_PER_DECAY)
+
+	# decay learning rate
+	lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE, global_step, decay_steps, LEARNING_RATE_DECAY_FACTOR, staircase=True)
+
+	tf.scalar_summary('learning_rate', lr)
+
+	# moving averages
+	loss_averages_op = add_loss_summaries(total_loss)
+
+	# compute gradients
+	with tf.control_dependencies([loss_averages_op]):
+		opt = tf.train.GradientDescentOptimizer(lr)
+		grads = opt.compute_gradients(total_loss)
+
+	# apply gradients
+	apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
+
+	# add histograms for trainable variables
+	for var in tf.trainable_variables():
+		tf.histogram_summary(var.op.name, var)
+
+	# add histograms for gradients
+	for grad, var in grads:
+		if grad is not None:
+			tf.histogram_summary(var.op.name + '/gradients', grad)
+
+	# track the moving averages of all trainable variables
+	variable_averages = tf.train.ExponentialMovingAverage(MOVING_AVERAGE_DECAY, global_step)
+	variables_averages_op  = variable_averages.apply(tf.trainable_variables())
+
+	# construct train operation
+	with tf.control_dependencies([apply_gradient_op, variables_averages_op]):
+		train_op = tf.no_op(name='train')
+
+	return train_op
