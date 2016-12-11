@@ -15,9 +15,9 @@ NUM_CLASSES = raseg_input.NUM_CLASSES
 NUM_EXAMPLES_EPOCH_TRAIN = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_EPOCH_EVAL = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 MOVING_AVERAGE_DECAY = 0.9999
-NUM_EPOCHS_PER_DECAY = 350.0
+NUM_EPOCHS_PER_DECAY = 12
 LEARNING_RATE_DECAY_FACTOR = 0.1
-INITIAL_LEARNING_RATE = 0.1
+INITIAL_LEARNING_RATE = 0.05
 
 
 def variable_on_cpu(name, shape, initializer):
@@ -95,7 +95,7 @@ def inference(voxel_regions):
 
 	# Conv1
 	with tf.variable_scope('conv1') as scope:
-		kernel = variable_with_weight_decay('weights', shape=[5, 5, 5, 1, 32], stddev=5e-2, wd=0.0)
+		kernel = variable_with_weight_decay('weights', shape=[5, 5, 5, 1, 32], stddev=5e-2, wd=0.00)
 		conv = tf.nn.conv3d(voxel_regions, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
 		biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
 		sums = tf.nn.bias_add(conv, biases)
@@ -103,7 +103,7 @@ def inference(voxel_regions):
 
 	# Conv2
 	with tf.variable_scope('conv2') as scope:
-		kernel = variable_with_weight_decay('weights', shape=[3,3,3,32,32], stddev=5e-2, wd=0.0)
+		kernel = variable_with_weight_decay('weights', shape=[3,3,3,32,32], stddev=5e-2, wd=0.00)
 		conv = tf.nn.conv3d(conv1, kernel, strides=[1,1,1,1,1], padding='SAME')
 		biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
 		sums = tf.nn.bias_add(conv, biases)
@@ -111,7 +111,7 @@ def inference(voxel_regions):
 
 	# Convd1 (1st downsampling layer)
 	with tf.variable_scope('convd1') as scope:
-		kernel = variable_with_weight_decay('weights', shape=[2,2,2,32,32], stddev=5e-2, wd=0.0)
+		kernel = variable_with_weight_decay('weights', shape=[2,2,2,32,32], stddev=5e-2, wd=0.00)
 		conv = tf.nn.conv3d(conv2, kernel, strides=[1,2,2,2,1], padding='SAME')
 		biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
 		sums = tf.nn.bias_add(conv, biases)
@@ -119,7 +119,7 @@ def inference(voxel_regions):
 
 	# Conv3
 	with tf.variable_scope('conv3') as scope:
-		kernel = variable_with_weight_decay('weights', shape=[3,3,3,32,64], stddev=5e-2, wd=0.0)
+		kernel = variable_with_weight_decay('weights', shape=[3,3,3,32,64], stddev=5e-2, wd=0.00)
 		conv = tf.nn.conv3d(convd1, kernel, strides=[1,1,1,1,1], padding='SAME')
 		biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
 		sums = tf.nn.bias_add(conv, biases)
@@ -127,7 +127,7 @@ def inference(voxel_regions):
 
 	# Conv4
 	with tf.variable_scope('conv4') as scope:
-		kernel = variable_with_weight_decay('weights', shape=[3,3,3,64,64], stddev=5e-2, wd=0.0)
+		kernel = variable_with_weight_decay('weights', shape=[3,3,3,64,64], stddev=5e-2, wd=0.00)
 		conv = tf.nn.conv3d(conv3, kernel, strides=[1,1,1,1,1], padding='SAME')
 		biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
 		sums = tf.nn.bias_add(conv, biases)
@@ -135,7 +135,7 @@ def inference(voxel_regions):
 
 	# Convd2 (2nd downsampling layer)
 	with tf.variable_scope('convd2') as scope:
-		kernel = variable_with_weight_decay('weights', shape=[2,2,2,64,64], stddev=5e-2, wd=0.0)
+		kernel = variable_with_weight_decay('weights', shape=[2,2,2,64,64], stddev=5e-2, wd=0.00)
 		conv = tf.nn.conv3d(conv4, kernel, strides=[1,2,2,2,1], padding='SAME')
 		biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
 		sums = tf.nn.bias_add(conv, biases)
@@ -158,7 +158,7 @@ def inference(voxel_regions):
 
 	# output, sums before softmax
 	with tf.variable_scope('softmax_linear') as scope:
-		weights = variable_with_weight_decay('weights', [4096, NUM_CLASSES], stddev=1/4096.0, wd=0.0)
+		weights = variable_with_weight_decay('weights', [4096, NUM_CLASSES], stddev=1/4096.0, wd=0.00)
 		biases = variable_on_cpu('biases', [NUM_CLASSES], tf.constant_initializer(0.0))
 		softmax_linear = tf.add(tf.matmul(fc2, weights), biases, name=scope.name)
 

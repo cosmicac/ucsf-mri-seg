@@ -1,34 +1,36 @@
 import numpy as np 
 import scipy.io as sio
 import os.path
-import tensorflow as tf
 from timeit import default_timer as timer 
 
-NUM_SAMPLE_TRAIN = 40000
+NUM_SAMPLE_TRAIN = 100000
 NUM_SAMPLE_TEST = 40000
 PATCH_SIZE = (32, 32, 8)
 PATCH_MARGINS = (int(PATCH_SIZE[0]/2), int(PATCH_SIZE[1]/2), int(PATCH_SIZE[2]/2))
 
-def extract_patch(img, labels, expected_label):
+def extract_patch(img, labels=None, expected_label=None, center=None):
 
-		# height, width, and depth of original image
-		h, w, d = img.shape
+	# height, width, and depth of original image
+	h, w, d = img.shape
 
+	if center:
+		ch, cw, cd = center
+	else:
 		# sample center of patch in original image at random
 		ch, cw, cd = sample_center(labels, expected_label)
 
-		# calculate the border indexes of the original image and our patch
-		ihl, ihu, phl, phu = calc_borders_1d(ch, h, PATCH_SIZE[0], PATCH_MARGINS[0]) 
-		iwl, iwu, pwl, pwu = calc_borders_1d(cw, w, PATCH_SIZE[1], PATCH_MARGINS[1])
-		idl, idu, pdl, pdu = calc_borders_1d(cd, d, PATCH_SIZE[2], PATCH_MARGINS[2])
+	# calculate the border indexes of the original image and our patch
+	ihl, ihu, phl, phu = calc_borders_1d(ch, h, PATCH_SIZE[0], PATCH_MARGINS[0]) 
+	iwl, iwu, pwl, pwu = calc_borders_1d(cw, w, PATCH_SIZE[1], PATCH_MARGINS[1])
+	idl, idu, pdl, pdu = calc_borders_1d(cd, d, PATCH_SIZE[2], PATCH_MARGINS[2])
 
-		# initalize patch
-		patch = np.zeros(PATCH_SIZE, dtype='uint16')
+	# initalize patch
+	patch = np.zeros(PATCH_SIZE, dtype='uint16')
 
-		# extract patch
-		patch[phl:phu, pwl:pwu, pdl:pdu] = img[ihl:ihu, iwl:iwu, idl:idu]
+	# extract patch
+	patch[phl:phu, pwl:pwu, pdl:pdu] = img[ihl:ihu, iwl:iwu, idl:idu]
 
-		return patch
+	return patch
 
 # takes an center index, and returns the border indexes of
 # both the original image and new patch along one dimension
@@ -70,48 +72,32 @@ def sample_center(labels, expected_label):
 if __name__ == '__main__':
 
 	# load images and labels
-	images_and_labels = np.load('../data/datasets/images_and_labels.npy')
+	images_and_labels = np.load('../../data/datasets/images_and_labels.npy')
 
 	n = len(images_and_labels)
 	print(n)
 	
 	train = []
 	train_labels = []
-	
-	# extract positive examples
-	for i in range(int(NUM_SAMPLE_TRAIN/2)):
+
+	for i in range(int(NUM_SAMPLE_TRAIN)):
 
 		if i % 200 == 0:
-			print("extracting positive example {0}".format(i))
+			print('extracting example {0}'.format(i))
 
 		# pick image at random
 		img_and_label = images_and_labels[np.random.randint(0, n)]
 
-
-		#extract patch
-		patch = extract_patch(img_and_label[0], img_and_label[1], 1)
-
-		train.append(patch)
-		train_labels.append(1)
-	
-
-	# extract negative examples
-	for i in range(int(NUM_SAMPLE_TRAIN/2)):
-
-		if i % 200 == 0:
-			print('extracting negative example {0}'.format(i))
-
-		# pick image at random
-		img_and_label = images_and_labels[np.random.randint(0, n)]
+		# pick a label, 0 or 1, at random
+		rlabel = np.random.randint(2)
 
 		# extract patch
-		patch = extract_patch(img_and_label[0], img_and_label[1], 0)
-
+		patch = extract_patch(img_and_label[0], labels=img_and_label[1], expected_label=rlabel)
 		train.append(patch)
-		train_labels.append(0)
+		train_labels.append(rlabel)
 
 	print("saving training set")
-	np.save('../data/datasets/validation', np.array(train))
-	np.save('../data/datasets/validation_labels', np.array(train_labels))
+	np.save('../../data/datasets/train_mix', np.array(train))
+	np.save('../../data/datasets/train_labels_mix', np.array(train_labels))
 
 	

@@ -80,7 +80,7 @@ def _generate_image_and_label_batch(image, label, min_queue_examples,
     batch_size: Number of images per batch.
     shuffle: boolean indicating whether to use a shuffling queue.
   Returns:
-    images: Images. 5D tensor of [batch_size, height,_labels width, depth, nchannels] size.
+    images: Images. 5D tensor of [batch_size, height, width, depth, nchannels] size.
     labels: Labels. 1D tensor of [batch_size] size.
   """
   # Create a queue that shuffles the examples, and then
@@ -101,7 +101,7 @@ def _generate_image_and_label_batch(image, label, min_queue_examples,
         capacity=min_queue_examples + 3 * batch_size)
 
   # Display the training images in the visualizer.
-  tf.image_summary('images', images)
+  tf.image_summary('images', images[:,:,:,0,:])
 
   return images, tf.reshape(label_batch, [batch_size])
 
@@ -120,8 +120,8 @@ def inputs(eval_data, data_dir, batch_size):
                  for i in xrange(1, 6)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
   else:
-    filenames = [os.path.join(data_dir, 'test_and_label_batch_{0}.bin'.format(i))
-                 for i in xrange(1, 3)]
+    filenames = [os.path.join(data_dir, 'img8d10_and_label_batch_{0}.bin'.format(i))
+                 for i in xrange(1, 2)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
   for f in filenames:
@@ -135,13 +135,12 @@ def inputs(eval_data, data_dir, batch_size):
   read_input = read_train_bin(filename_queue)
   image = tf.cast(read_input.int16image, tf.float32)
 
-  # Subtract off the mean and divide by the variance of the pixels.
+  # Subtract off the mean and divide by the adjusted std. of the pixels.
   mean, variance = tf.nn.moments(image, axes=[0,1,2,3])
   adjusted_stddev = tf.maximum(tf.sqrt(variance), tf.div(tf.constant(1.0),
                                                   tf.sqrt(tf.to_float(tf.size(image)))))
 
-  float_image = tf.div(tf.sub(image, mean), variance) 
-  #float_image = tf.image.per_image_whitening(image)
+  float_image = tf.div(tf.sub(image, mean), adjusted_stddev) 
 
   # Ensure that the random shuffling has good mixing properties.
   min_fraction_of_examples_in_queue = 0.4
@@ -151,4 +150,4 @@ def inputs(eval_data, data_dir, batch_size):
   # Generate a batch of images and labels by building up a queue of examples.
   return _generate_image_and_label_batch(float_image, read_input.label,
                                          min_queue_examples, batch_size,
-                                         shuffle=True)
+                                         shuffle=False)
