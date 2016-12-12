@@ -9,7 +9,7 @@ import raseg_model
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('eval_dir', '../models/raseg_eval_img8d10',
+tf.app.flags.DEFINE_string('eval_dir', '../models/raseg_eval',
                            """Directory where to write event logs.""")
 tf.app.flags.DEFINE_string('eval_data', 'test',
                            """Either 'test' or 'train_eval'.""")
@@ -17,11 +17,10 @@ tf.app.flags.DEFINE_string('checkpoint_dir', '../models/raseg_train_mix',
                            """Directory where to read model checkpoints.""")
 tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 5,
                             """How often to run the eval.""")
-tf.app.flags.DEFINE_integer('num_examples', 262144,
+tf.app.flags.DEFINE_integer('num_examples', 40000,
                             """Number of examples to run.""")
 tf.app.flags.DEFINE_boolean('run_once', True,
                          """Whether to run eval only once.""")
-
 
 def eval_once(saver, summary_writer, ops, summary_op):
   """Run Eval once.
@@ -61,16 +60,19 @@ def eval_once(saver, summary_writer, ops, summary_op):
       preds = []
 
       while step < num_iter and not coord.should_stop():
+        # Run the ops and whatever is needed to return their output
         predictions = sess.run(ops)
-        preds.extend(predictions[1].indices.flatten())
-        true_count += np.sum(predictions[0])
+        # Extend the predictions array with the predictions from the current batch
+        #preds.extend(predictions[1].indices.flatten())
+        # Increase the count of correct predictions
+        #true_count += np.sum(predictions[0])
+        true_count += np.sum(predictions)
         step += 1
         if step % 200 == 0:
           print("Processing batch {0}.".format(step))
 
-
-      np.save('../preds/mix_preds', preds)
-
+      # Save predictions
+      #np.save('../preds/img8d11_preds_check', preds)
       
       # Compute precision @ 1.
       precision = true_count / total_sample_count
@@ -93,7 +95,6 @@ def evaluate():
   with tf.Graph().as_default() as g:
     # Get images and labels
     eval_data = FLAGS.eval_data == 'test'
-    #eval_data = False
 
     images, labels = raseg_model.inputs(eval_data=eval_data)
 
@@ -117,7 +118,8 @@ def evaluate():
     summary_writer = tf.summary.FileWriter(FLAGS.eval_dir, g)
 
     while True:
-      eval_once(saver, summary_writer, [top_k_op, top_k_op_vals], summary_op)
+      #eval_once(saver, summary_writer, [top_k_op, top_k_op_vals], summary_op)
+      eval_once(saver, summary_writer, [top_k_op], summary_op)
       if FLAGS.run_once:
         break
       time.sleep(FLAGS.eval_interval_secs)

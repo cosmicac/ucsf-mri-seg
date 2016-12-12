@@ -44,9 +44,9 @@ if __name__ == '__main__':
 	flatten_and_bin(imgs5, labels5, '../../data/datasets/bins/train_and_label_mix_batch_5.bin')
 	"""
 
-	img8d10 = np.load('../../data/datasets/pred_arrs/img8d10.npy').astype('uint16')
-	img8d10_labels = np.load('../../data/datasets/pred_arrs/img8d10_labels.npy').astype('uint16')
-	flatten_and_bin(img8d10, img8d10_labels, '../../data/datasets/pred_arrs/bins/img8d10_and_label_batch_1.bin')
+	img8d9 = np.load('../../data/datasets/pred_arrs/img8d9.npy').astype('uint16')
+	img8d9_labels = np.load('../../data/datasets/pred_arrs/img8d9_labels.npy').astype('uint16')
+	flatten_and_bin(img8d9, img8d9_labels, '../../data/datasets/bins/img8d9_and_label_batch_1.bin')
 
 
 
