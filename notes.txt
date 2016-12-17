@@ -1,0 +1,3 @@
+. dense inference
+. what's the loss function for dense inference?
+. implement end to end
