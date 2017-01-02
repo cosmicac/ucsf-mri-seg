@@ -5,7 +5,7 @@ import tensorflow as tf
 PATCH_HEIGHT = 32
 PATCH_WIDTH = 32
 PATCH_DEPTH = 8
-NCHANNELS = 1
+NCHANNELS = 2
 
 NUM_CLASSES = 2
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 100000
@@ -46,8 +46,8 @@ def read_train_bin(filename_queue):
   # fixed number of bytes for each.
   record_bytes = label_bytes + image_bytes
 
-  # should be 32*32*8*2 + 2
-  assert record_bytes == 16386
+  # should be 32*32*8*2*2 + 2
+  assert record_bytes == 32770
 
   # Read a record, getting filenames from the filename_queue.  No
   # header or footer in the format, so we leave header_bytes
@@ -62,8 +62,7 @@ def read_train_bin(filename_queue):
   result.label = tf.cast(
       tf.slice(record_bytes, [0], [1]), tf.int32)
 
-  # The remaining bytes after the label represent the image, which we reshape
-  # from [depth * height * width * nchannels] to [depth, height, width, nchannels].
+  # The remaining bytes after the label represent the image, which we reshape.
   result.int16image = tf.reshape(tf.slice(record_bytes, [1], [int(image_bytes/2)]),
                            [result.height, result.width, result.depth, result.nchannels])
 
@@ -101,7 +100,7 @@ def _generate_image_and_label_batch(image, label, min_queue_examples,
         capacity=min_queue_examples + 3 * batch_size)
 
   # Display the training images in the visualizer.
-  tf.image_summary('images', images[:,:,:,0,:])
+  tf.image_summary('images', images[:,:,:,0,0])
 
   return images, tf.reshape(label_batch, [batch_size])
 
@@ -112,7 +111,7 @@ def inputs(eval_data, data_dir, batch_size):
     data_dir: Path to the data directory.
     batch_size: Number of images per batch.
   Returns:
-    images: Images. 5D tensor of [batch_size, PATCH_HEIGHT, PATCH_DEPTH, NCHANNELS, 3] size.
+    images: Images. 5D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH, NCHANNELS] size.
     labels: Labels. 1D tensor of [batch_size] size.
   """
   if not eval_data:
@@ -135,10 +134,15 @@ def inputs(eval_data, data_dir, batch_size):
   read_input = read_train_bin(filename_queue)
   image = tf.cast(read_input.int16image, tf.float32)
 
-  # Subtract off the mean and divide by the adjusted std. of the pixels.
-  mean, variance = tf.nn.moments(image, axes=[0,1,2,3])
+  # Subtract off mean and divide by the adjusted std. of the pixels - channel wise
+  mean, variance = tf.nn.moments(image, axes=[0,1,2])
   adjusted_stddev = tf.maximum(tf.sqrt(variance), tf.div(tf.constant(1.0),
-                                                  tf.sqrt(tf.to_float(tf.size(image)))))
+                                                  tf.sqrt(tf.to_float(PATCH_HEIGHT*PATCH_WIDTH*PATCH_DEPTH))))
+
+  # Subtract off the mean and divide by the adjusted std. of the pixels.
+  # mean, variance = tf.nn.moments(image, axes=[0,1,2,3])
+  # adjusted_stddev = tf.maximum(tf.sqrt(variance), tf.div(tf.constant(1.0),
+  #                                                tf.sqrt(tf.to_float(tf.size(image)))))
 
   float_image = tf.div(tf.sub(image, mean), adjusted_stddev) 
 

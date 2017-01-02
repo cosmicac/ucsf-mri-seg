@@ -1,23 +1,20 @@
 import numpy as np 
 import scipy.io as sio
 import os.path
-from timeit import default_timer as timer 
+import time
 
 NUM_SAMPLE_TRAIN = 100000
 NUM_SAMPLE_TEST = 40000
 PATCH_SIZE = (32, 32, 8)
 PATCH_MARGINS = (int(PATCH_SIZE[0]/2), int(PATCH_SIZE[1]/2), int(PATCH_SIZE[2]/2))
 
-def extract_patch(img, labels=None, expected_label=None, center=None):
+def extract_patch(img, center):
 
 	# height, width, and depth of original image
 	h, w, d = img.shape
 
-	if center:
-		ch, cw, cd = center
-	else:
-		# sample center of patch in original image at random
-		ch, cw, cd = sample_center(labels, expected_label)
+	# unpack center
+	ch, cw, cd = center
 
 	# calculate the border indexes of the original image and our patch
 	ihl, ihu, phl, phu = calc_borders_1d(ch, h, PATCH_SIZE[0], PATCH_MARGINS[0]) 
@@ -69,7 +66,7 @@ def sample_center(labels, expected_label):
 
 	return i[ri], j[ri], k[ri]
 
-if __name__ == '__main__':
+def make_dataset_one_channel():
 
 	# load images and labels
 	images_and_labels = np.load('../../data/datasets/images_and_labels.npy')
@@ -99,5 +96,68 @@ if __name__ == '__main__':
 	print("saving training set")
 	np.save('../../data/datasets/train_mix', np.array(train))
 	np.save('../../data/datasets/train_labels_mix', np.array(train_labels))
+
+def make_dataset_with_two_channels(c1, c2, labs):
+
+	n = c1.shape[0]
+
+	train = []
+	train_labels = []
+	count = 1
+	for i in range(n):
+		for j in range(int(NUM_SAMPLE_TRAIN/n)):
+
+			if count % 200 == 0:
+				print('extracting example {0}'.format(count))
+
+			t1 = time.time()
+			# generate random label and center based on radom label
+			label = np.random.randint(2)
+			center = sample_center(labs[i], label)
+			t2 = time.time()
+			if count % 200 == 0:
+				print("Generate random sample and center time: {0}".format(t2-t1))
+
+			t1 = time.time()
+			# extract patches from channels
+			c1patch = extract_patch(c1[i], center)
+			c2patch = extract_patch(c2[i], center)
+			t2 = time.time()
+			if count % 200 == 0:
+				print("Extracting patch time: {0}".format(t2-t1))
+
+			t1 = time.time()
+			# concatenate the patches
+			patch = np.concatenate((c1patch[...,np.newaxis], c2patch[...,np.newaxis]), axis=3)
+			t2 = time.time()
+			if count % 200 == 0:			
+				print("Concatenating patch time: {0}".format(t2-t1))
+
+			# append to datasets
+			train.append(patch)
+			train_labels.append(label)
+
+			# increment counter
+			count += 1
+
+	# shuffle 
+	p = np.random.permutation(NUM_SAMPLE_TRAIN):
+	train = train[p]
+	train_labels = train_labels[p]
+	
+	return train, train_labels
+
+if __name__ == '__main__':
+
+	# load images and labels
+	images_and_labels = np.load('../../data/datasets/images_and_labels.npy')
+	pre_images = np.load('../../data/datasets/pre_images.npy')
+
+	c1, c2, labs = images_and_labels[:,0,:,:,:], pre_images, images_and_labels[:,1,:,:,:]
+	train, train_labels = make_dataset_with_two_channels(c1, c2, labs)
+
+	np.save('../../data/datasets/train_2ch', np.array(train))
+	np.save('../../data/datasets/train_labels_2ch', np.array(train_labels))
+
 
 	

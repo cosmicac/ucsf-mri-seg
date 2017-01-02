@@ -95,7 +95,7 @@ def inference(voxel_regions):
 
 	# Conv1
 	with tf.variable_scope('conv1') as scope:
-		kernel = variable_with_weight_decay('weights', shape=[5, 5, 5, 1, 32], stddev=5e-2, wd=0.00)
+		kernel = variable_with_weight_decay('weights', shape=[5, 5, 5, 2, 32], stddev=5e-2, wd=0.00)
 		conv = tf.nn.conv3d(voxel_regions, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
 		biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
 		sums = tf.nn.bias_add(conv, biases)
