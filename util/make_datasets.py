@@ -127,6 +127,9 @@ def make_dataset_with_two_channels(c1, c2, labs):
 			# increment counter
 			count += 1
 
+	# make into np arrays
+	train , train_labels = np.array(train), np.array(train_labels)
+
 	# shuffle 
 	p = np.random.permutation(NUM_SAMPLE_TRAIN)
 	train = train[p]
