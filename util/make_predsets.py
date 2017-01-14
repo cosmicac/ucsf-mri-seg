@@ -37,5 +37,5 @@ if __name__ == '__main__':
 	img8d11_labels = images_and_labels[8,1,:,:,11].astype('uint16').flatten()
 	img8d11 = imgslice_to_patch_arr(img8c1, img8c2, 11).astype('uint16')
 
-	npy_to_bin.flatten_and_bin(img8d11, img8d11_labels, '../../data/datasets/bins/img8d11_and_label_batch_1.bin')
+	npy_to_bin.flatten_and_bin(img8d11, img8d11_labels, '../../data/datasets/bins/img8d11_and_label_2ch_batch_1.bin')
 
