@@ -36,7 +36,7 @@ def variable_with_weight_decay(name, shape, stddev, wd):
 	dtype = tf.float16 if FLAGS.use_fp16 else tf.float32
 	var = variable_on_cpu(name, shape, tf.truncated_normal_initializer(stddev=stddev, dtype=dtype))
 	if wd is not None:
-		weight_decay = tf.mul(tf.nn.l2_loss(var), wd, name='weight_loss')
+		weight_decay = tf.multiply(tf.nn.l2_loss(var), wd, name='weight_loss')
 		tf.add_to_collection('losses', weight_decay)
 	return var
 
@@ -46,7 +46,7 @@ def loss(logits, labels):
 	labels = tf.cast(labels, tf.int64)
 
 	# one-hot the labels and then softmax and calculate cross entropy for each sample
-	cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits, labels, name='cross_entropy_per_sample')
+	cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels, name='cross_entropy_per_sample')
 
 	# average cross entropy for the batch
 	cross_entropy_mean = tf.reduce_mean(cross_entropy, name='cross_entropy')
@@ -61,14 +61,14 @@ def add_loss_summaries(total_loss):
 	loss_averages_op = loss_averages.apply(losses + [total_loss])
 
 	for l in losses + [total_loss]:
-		tf.scalar_summary(l.op.name + ' (raw)', l)
-		tf.scalar_summary(l.op.name, loss_averages.average(l))
+		tf.summary.scalar(l.op.name + ' (raw)', l)
+		tf.summary.scalar(l.op.name, loss_averages.average(l))
 
 	return loss_averages_op
 
 def activation_summary(x):
-	tf.histogram_summary(x.op.name + '/activations', x)
-	tf.scalar_summary(tensor_name + 'sparsity', tf.nn.zero_fraction(x))
+	tf.summary.histogram(x.op.name + '/activations', x)
+	tf.summary.scalar(tensor_name + 'sparsity', tf.nn.zero_fraction(x))
 
 def inputs(eval_data):
   """Construct input for evaluation using the Reader ops.
@@ -171,7 +171,7 @@ def train(total_loss, global_step):
 	# decay learning rate
 	lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE, global_step, decay_steps, LEARNING_RATE_DECAY_FACTOR, staircase=True)
 
-	tf.scalar_summary('learning_rate', lr)
+	tf.summary.scalar('learning_rate', lr)
 
 	# moving averages
 	loss_averages_op = add_loss_summaries(total_loss)
@@ -186,12 +186,12 @@ def train(total_loss, global_step):
 
 	# add histograms for trainable variables
 	for var in tf.trainable_variables():
-		tf.histogram_summary(var.op.name, var)
+		tf.summary.histogram(var.op.name, var)
 
 	# add histograms for gradients
 	for grad, var in grads:
 		if grad is not None:
-			tf.histogram_summary(var.op.name + '/gradients', grad)
+			tf.summary.histogram(var.op.name + '/gradients', grad)
 
 	# track the moving averages of all trainable variables
 	variable_averages = tf.train.ExponentialMovingAverage(MOVING_AVERAGE_DECAY, global_step)

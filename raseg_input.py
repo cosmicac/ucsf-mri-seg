@@ -100,7 +100,7 @@ def _generate_image_and_label_batch(image, label, min_queue_examples,
         capacity=min_queue_examples + 3 * batch_size)
 
   # Display the training images in the visualizer.
-  tf.image_summary('images', images[:,:,:,0,0])
+  tf.summary.image('images', tf.reshape(images[:,:,:,0,0], (batch_size, PATCH_HEIGHT, PATCH_WIDTH, 1)))
 
   return images, tf.reshape(label_batch, [batch_size])
 
@@ -115,11 +115,11 @@ def inputs(eval_data, data_dir, batch_size):
     labels: Labels. 1D tensor of [batch_size] size.
   """
   if not eval_data:
-    filenames = [os.path.join(data_dir, 'train_and_label_mix_batch_{0}.bin'.format(i))
+    filenames = [os.path.join(data_dir, 'train_and_label_2ch_batch_{0}.bin'.format(i))
                  for i in xrange(1, 6)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
   else:
-    filenames = [os.path.join(data_dir, 'val_and_label_mix_batch_{0}.bin'.format(i))
+    filenames = [os.path.join(data_dir, 'val_and_label_2ch_batch_{0}.bin'.format(i))
                  for i in xrange(1, 2)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
@@ -144,7 +144,7 @@ def inputs(eval_data, data_dir, batch_size):
   # adjusted_stddev = tf.maximum(tf.sqrt(variance), tf.div(tf.constant(1.0),
   #                                                tf.sqrt(tf.to_float(tf.size(image)))))
 
-  float_image = tf.div(tf.sub(image, mean), adjusted_stddev) 
+  float_image = tf.divide(tf.subtract(image, mean), adjusted_stddev) 
 
   # Ensure that the random shuffling has good mixing properties.
   min_fraction_of_examples_in_queue = 0.4
