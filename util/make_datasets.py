@@ -110,29 +110,16 @@ def make_dataset_with_two_channels(c1, c2, labs):
 			if count % 200 == 0:
 				print('extracting example {0}'.format(count))
 
-			t1 = time.time()
 			# generate random label and center based on radom label
 			label = np.random.randint(2)
 			center = sample_center(labs[i], label)
-			t2 = time.time()
-			if count % 200 == 0:
-				print("Generate random sample and center time: {0}".format(t2-t1))
 
-			t1 = time.time()
 			# extract patches from channels
 			c1patch = extract_patch(c1[i], center)
 			c2patch = extract_patch(c2[i], center)
-			t2 = time.time()
-			if count % 200 == 0:
-				print("Extracting patch time: {0}".format(t2-t1))
 
-			t1 = time.time()
 			# concatenate the patches
 			patch = np.concatenate((c1patch[...,np.newaxis], c2patch[...,np.newaxis]), axis=3)
-			t2 = time.time()
-			if count % 200 == 0:			
-				print("Concatenating patch time: {0}".format(t2-t1))
-
 			# append to datasets
 			train.append(patch)
 			train_labels.append(label)
@@ -141,7 +128,7 @@ def make_dataset_with_two_channels(c1, c2, labs):
 			count += 1
 
 	# shuffle 
-	p = np.random.permutation(NUM_SAMPLE_TRAIN):
+	p = np.random.permutation(NUM_SAMPLE_TRAIN)
 	train = train[p]
 	train_labels = train_labels[p]
 	
