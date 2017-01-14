@@ -12,13 +12,13 @@ FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string('eval_dir', '../models/raseg_eval',
                            """Directory where to write event logs.""")
-tf.app.flags.DEFINE_string('eval_data', 'train_eval',
+tf.app.flags.DEFINE_string('eval_data', 'test',
                            """Either 'test' or 'train_eval'.""")
 tf.app.flags.DEFINE_string('checkpoint_dir', '../models/raseg_train_2ch',
                            """Directory where to read model checkpoints.""")
 tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 5,
                             """How often to run the eval.""")
-tf.app.flags.DEFINE_integer('num_examples', 100000,
+tf.app.flags.DEFINE_integer('num_examples', 262144,
                             """Number of examples to run.""")
 tf.app.flags.DEFINE_boolean('run_once', True,
                          """Whether to run eval only once.""")
@@ -73,7 +73,7 @@ def eval_once(saver, summary_writer, ops, summary_op):
           print("Processing batch {0}.".format(step))
 
       # Save predictions
-      #np.save('../preds/sanity_preds_check', preds)
+      np.save('../preds/img8d11_2ch_preds', preds)
       
       # Compute precision @ 1.
       print(true_count)

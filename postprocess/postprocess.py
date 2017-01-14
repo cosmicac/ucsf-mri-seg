@@ -25,7 +25,7 @@ def save_true_pre_post_images(iml, i, d):
 	p_post = postprocess(p)
 
 	overlay_mask_and_save(img, img_labels, '../../pictures/img{0}d{1}_seg_true'.format(i, d))
-	overlay_mask_and_save(img, p, '../../pictures/img{0}d{1}_seg_pre.format'.format(i,d))
+	overlay_mask_and_save(img, p, '../../pictures/img{0}d{1}_seg_pre'.format(i,d))
 	overlay_mask_and_save(img, p_post, '../../pictures/img{0}d{1}_seg_post'.format(i,d))
 
 def calc_metrics(true_labs, pred_labs):
@@ -56,8 +56,9 @@ if __name__ == '__main__':
 	# load all images and labels
 	iml = np.load('../../data/datasets/images_and_labels.npy')
 
-	#save_true_pre_post_images(iml, 8, 11)
-	
+	save_true_pre_post_images(iml, 8, 11)
+
+	"""	
 	true_labs9 = iml[8,1,:,:,9]
 	pred_labs9 = load_preds(8, 9)
 	print("Depth 9")
@@ -86,3 +87,4 @@ if __name__ == '__main__':
 
 	print("Depth 11 post")
 	print(calc_metrics(true_labs11, pred_labs11_post))
+	"""

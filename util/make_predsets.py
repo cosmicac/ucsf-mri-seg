@@ -4,7 +4,7 @@ import npy_to_bin
 
 def imgslice_to_patch_arr(imgc1, imgc2, depth):
 	
-	h, w, d = img.shape
+	h, w, d = imgc1.shape
 	patch_arr = []
 	count = 0
 
