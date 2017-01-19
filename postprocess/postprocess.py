@@ -19,14 +19,13 @@ def postprocess(img):
 	open_closed_med = ndimage.median_filter(closed, 5)
 	return open_closed_med
 
-def save_true_pre_post_images(iml, i, d):
+def save_true_pre_post_images(iml, i, d, tag):
 	img, img_labels = get_img_and_labels(iml, i, d)
-	p = np.load('../../preds/img{0}d{1}_preds.npy'.format(i,d)).reshape((512, 512))
+	p = np.load('../../preds/img{0}d{1}_{2}_preds.npy'.format(i,d, tag)).reshape((512, 512))
 	p_post = postprocess(p)
-
-	overlay_mask_and_save(img, img_labels, '../../pictures/img{0}d{1}_seg_true'.format(i, d))
-	overlay_mask_and_save(img, p, '../../pictures/img{0}d{1}_seg_pre'.format(i,d))
-	overlay_mask_and_save(img, p_post, '../../pictures/img{0}d{1}_seg_post'.format(i,d))
+	overlay_mask_and_save(img, img_labels, '../../pictures/img{0}d{1}_{2}_seg_true'.format(i,d,tag))
+	overlay_mask_and_save(img, p, '../../pictures/img{0}d{1}_{2}_seg_pre'.format(i,d,tag))
+	overlay_mask_and_save(img, p_post, '../../pictures/img{0}d{1}_{2}_seg_post'.format(i,d,tag))
 
 def calc_metrics(true_labs, pred_labs):
 
@@ -56,7 +55,7 @@ if __name__ == '__main__':
 	# load all images and labels
 	iml = np.load('../../data/datasets/images_and_labels.npy')
 
-	save_true_pre_post_images(iml, 8, 11)
+	save_true_pre_post_images(iml, 8, 11, '2ch_lessiter')
 
 	"""	
 	true_labs9 = iml[8,1,:,:,9]

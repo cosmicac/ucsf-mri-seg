@@ -35,8 +35,8 @@ def eval_once(saver, summary_writer, ops, summary_op):
     ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
     if ckpt and ckpt.model_checkpoint_path:
       # Restores from checkpoint
-      saver.restore(sess, ckpt.model_checkpoint_path)
-      #saver.restore(sess, '../models/raseg_train_mix/model.ckpt-15093')
+      #saver.restore(sess, ckpt.model_checkpoint_path)
+      saver.restore(sess, '../models/raseg_train_2ch/model.ckpt-17312')
 
       # Assuming model_checkpoint_path looks something like:
       #   /my-favorite-path/raseg_train/model.ckpt-0,
@@ -73,7 +73,7 @@ def eval_once(saver, summary_writer, ops, summary_op):
           print("Processing batch {0}.".format(step))
 
       # Save predictions
-      np.save('../preds/img8d11_2ch_preds', preds)
+      np.save('../preds/img8d11_2ch_lessiter_preds', preds)
       
       # Compute precision @ 1.
       print(true_count)
