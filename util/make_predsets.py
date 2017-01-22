@@ -49,5 +49,5 @@ if __name__ == '__main__':
 	npy_to_bin.flatten_and_bin(img8d11, img8d11_labels, '../../data/datasets/bins/img8d10_and_label_2ch_batch_1.bin')
 	"""
 
-	predict_slice(images_and_labels, pre_images, 8, 11, '../../data/datasets/bins/img8d11_and_label_2ch_batch_1.bin')
+	predict_slice(images_and_labels, pre_images, 8, 9, '../../data/datasets/bins/img8d9_and_label_2ch_batch_1.bin')
 

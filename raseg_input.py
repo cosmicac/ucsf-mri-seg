@@ -8,8 +8,8 @@ PATCH_DEPTH = 8
 NCHANNELS = 2
 
 NUM_CLASSES = 2
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 100000
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 40000
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 262144
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 262144
 
 def read_train_bin(filename_queue):
   """Reads and parses patches from training data files.
@@ -115,11 +115,11 @@ def inputs(eval_data, data_dir, batch_size):
     labels: Labels. 1D tensor of [batch_size] size.
   """
   if not eval_data:
-    filenames = [os.path.join(data_dir, 'train_and_label_2ch_batch_{0}.bin'.format(i))
+    filenames = [os.path.join(data_dir, 'train_and_label_2ch_big_batch_{0}.bin'.format(i))
                  for i in xrange(1, 6)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
   else:
-    filenames = [os.path.join(data_dir, 'img8d11_and_label_2ch_batch_{0}.bin'.format(i))
+    filenames = [os.path.join(data_dir, 'img8d9_and_label_2ch_batch_{0}.bin'.format(i))
                  for i in xrange(1, 2)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 

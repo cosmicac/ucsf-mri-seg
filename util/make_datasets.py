@@ -3,7 +3,7 @@ import scipy.io as sio
 import os.path
 import time
 
-NUM_SAMPLE_TRAIN = 40000
+NUM_SAMPLE_TRAIN = 500000
 NUM_SAMPLE_TEST = 40000
 PATCH_SIZE = (32, 32, 8)
 PATCH_MARGINS = (int(PATCH_SIZE[0]/2), int(PATCH_SIZE[1]/2), int(PATCH_SIZE[2]/2))
@@ -146,7 +146,7 @@ if __name__ == '__main__':
 	c1, c2, labs = images_and_labels[:,0,:,:,:], pre_images, images_and_labels[:,1,:,:,:]
 	train, train_labels = make_dataset_with_two_channels(c1, c2, labs)
 	
-	np.save('../../data/datasets/train_2ch_val', np.array(train))
-	np.save('../../data/datasets/train_labels_2ch_val', np.array(train_labels))
+	np.save('../../data/datasets/train_2ch_big', np.array(train))
+	np.save('../../data/datasets/train_labels_2ch_big', np.array(train_labels))
 
 	

@@ -5,8 +5,8 @@ from scipy import ndimage
 def get_img_and_labels(iml, i, d):
 	return iml[i,0,:,:,d], iml[i,1,:,:,d]
 
-def load_preds(i, d):
-	return np.load('../../preds/img{0}d{1}_preds.npy'.format(i,d)).reshape((512,512))
+def load_preds(i, d, tag):
+	return np.load('../../preds/img{0}d{1}_{2}_preds.npy'.format(i,d,tag)).reshape((512,512))
 
 def overlay_mask_and_save(img, mask, filename):
 	plt.imshow(img, cmap='bone')
@@ -21,7 +21,7 @@ def postprocess(img):
 
 def save_true_pre_post_images(iml, i, d, tag):
 	img, img_labels = get_img_and_labels(iml, i, d)
-	p = np.load('../../preds/img{0}d{1}_{2}_preds.npy'.format(i,d, tag)).reshape((512, 512))
+	p = np.load('../../preds/img{0}d{1}_{2}_preds.npy'.format(i,d,tag)).reshape((512, 512))
 	p_post = postprocess(p)
 	overlay_mask_and_save(img, img_labels, '../../pictures/img{0}d{1}_{2}_seg_true'.format(i,d,tag))
 	overlay_mask_and_save(img, p, '../../pictures/img{0}d{1}_{2}_seg_pre'.format(i,d,tag))
@@ -55,22 +55,24 @@ if __name__ == '__main__':
 	# load all images and labels
 	iml = np.load('../../data/datasets/images_and_labels.npy')
 
-	save_true_pre_post_images(iml, 8, 11, '2ch_lessiter')
+	#save_true_pre_post_images(iml, 8, 9, '2ch_big')
 
-	"""	
+	
 	true_labs9 = iml[8,1,:,:,9]
-	pred_labs9 = load_preds(8, 9)
+	pred_labs9 = load_preds(8, 9, '2ch_big')
+
+	true_labs10 = iml[8,1,:,:,10]
+	pred_labs10 = load_preds(8, 10, '2ch_big')
+
+	true_labs11 = iml[8,1,:,:,11]
+	pred_labs11 = load_preds(8, 11, '2ch_big')
+
 	print("Depth 9")
 	print(calc_metrics(true_labs9, pred_labs9))
 
-	
-	true_labs10 = iml[8,1,:,:,10]
-	pred_labs10 = load_preds(8, 10)
 	print("Depth 10")
 	print(calc_metrics(true_labs10, pred_labs10))
 
-	true_labs11 = iml[8,1,:,:,11]
-	pred_labs11 = load_preds(8, 11)
 	print("Depth 11")
 	print(calc_metrics(true_labs11, pred_labs11))
 
@@ -86,4 +88,4 @@ if __name__ == '__main__':
 
 	print("Depth 11 post")
 	print(calc_metrics(true_labs11, pred_labs11_post))
-	"""
+	
