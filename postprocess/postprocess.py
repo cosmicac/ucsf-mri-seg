@@ -55,7 +55,8 @@ if __name__ == '__main__':
 	# load all images and labels
 	iml = np.load('../../data/datasets/images_and_labels.npy')
 
-	#save_true_pre_post_images(iml, 8, 9, '2ch_big')
+	#save_true_pre_post_images(iml, 8, 10, '2ch_imgs')
+	#save_true_pre_post_images(iml, 8, 9, '2ch_imgs')
 
 	
 	true_labs9 = iml[8,1,:,:,9]

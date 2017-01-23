@@ -23,11 +23,11 @@ if __name__ == '__main__':
 
 	
 	# todo don't hardcode this
-	imgs1 = imgs[:100000,:,:,:]
-	imgs2 = imgs[100000:200000,:,:,:]
-	imgs3 = imgs[200000:300000,:,:,:]
-	imgs4 = imgs[300000:400000,:,:,:]
-	imgs5 = imgs[400000:500000,:,:,:]
+	imgs1 = imgs[:100000,:,:,:,:]
+	imgs2 = imgs[100000:200000,:,:,:,:]
+	imgs3 = imgs[200000:300000,:,:,:,:]
+	imgs4 = imgs[300000:400000,:,:,:,:]
+	imgs5 = imgs[400000:500000,:,:,:,:]
 	
 	labels1 = labels[:100000]
 	labels2 = labels[100000:200000]
