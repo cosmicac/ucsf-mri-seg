@@ -1,3 +1,5 @@
-. dense inference
+. investigate/inmplement dense inference for patch based method
+. ^ is this still considered patch based then?
 . what's the loss function for dense inference?
-. implement end to end
+. try dice loss function?
+. implement end to end, fully convolutional
