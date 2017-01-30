@@ -27,6 +27,13 @@ def save_true_pre_post_images(iml, i, d, tag):
 	overlay_mask_and_save(img, p, '../../pictures/img{0}d{1}_{2}_seg_pre'.format(i,d,tag))
 	overlay_mask_and_save(img, p_post, '../../pictures/img{0}d{1}_{2}_seg_post'.format(i,d,tag))
 
+def save_pre_post_given_mask(iml, i, d, mask, savetag): 
+	img, img_labels = get_img_and_labels(iml, i, d)
+	mask_post = postprocess(mask)
+	#overlay_mask_and_save(img, img_labels, '../../pictures/img{0}d{1}_{2}_seg_true'.format(i,d,tag))
+	overlay_mask_and_save(img, mask, '../../pictures/img{0}d{1}_{2}_seg_pre'.format(i,d,savetag))
+	overlay_mask_and_save(img, mask_post, '../../pictures/img{0}d{1}_{2}_seg_post'.format(i,d,savetag))
+
 def calc_metrics(true_labs, pred_labs):
 
 	# calculate basics

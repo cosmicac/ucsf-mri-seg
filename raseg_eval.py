@@ -14,7 +14,7 @@ tf.app.flags.DEFINE_string('eval_dir', '../models/raseg_eval',
                            """Directory where to write event logs.""")
 tf.app.flags.DEFINE_string('eval_data', 'test',
                            """Either 'test' or 'train_eval'.""")
-tf.app.flags.DEFINE_string('checkpoint_dir', '../models/raseg_train_2ch_imgs',
+tf.app.flags.DEFINE_string('checkpoint_dir', '../models/raseg_train_2ch_big',
                            """Directory where to read model checkpoints.""")
 tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 5,
                             """How often to run the eval.""")
@@ -55,16 +55,22 @@ def eval_once(saver, summary_writer, ops, summary_op):
                                          start=True))
 
       num_iter = int(math.ceil(FLAGS.num_examples / FLAGS.batch_size))
-      true_count = 0  # Counts the number of correct predictions.
+      true_count = 0  # Count sthe number of correct predictions.
       total_sample_count = num_iter * FLAGS.batch_size
       step = 0
       preds = []
+      logits = []
 
       while step < num_iter and not coord.should_stop():
         # Run the ops and whatever is needed to return their output
         predictions = sess.run(ops)
         # Extend the predictions array with the predictions from the current batch
-        preds.extend(predictions[1].indices.flatten())
+        #preds.extend(predictions[1].indices.flatten())
+        preds.append(predictions[1].indices)
+
+        # Append the logits for the current batch
+        logits.append(predictions[1].values)
+
         # Increase the count of correct predictions
         true_count += np.sum(predictions[0])
         #true_count += np.sum(predictions)
@@ -73,7 +79,10 @@ def eval_once(saver, summary_writer, ops, summary_op):
           print("Processing batch {0}.".format(step))
 
       # Save predictions
-      np.save('../preds/img8d9_2ch_imgs_preds', preds)
+      np.save('../preds/img8d11_2ch_big_preds', preds)
+
+      # Save logits
+      np.save('../preds/img8d11_2ch_big_logits', logits)
       
       # Compute precision @ 1.
       print(true_count)
@@ -107,7 +116,7 @@ def evaluate():
 
     # Calculate predictions.
     top_k_op = tf.nn.in_top_k(logits, labels, 1)
-    top_k_op_vals = tf.nn.top_k(logits, k=1)
+    top_k_op_vals = tf.nn.top_k(logits, k=2, sorted=False)
 
     # Restore the moving average version of the learned variables for eval.
     variable_averages = tf.train.ExponentialMovingAverage(
