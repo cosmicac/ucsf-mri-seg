@@ -2,6 +2,8 @@ import numpy as np
 import scipy.io as sio
 import os.path
 import time
+import npy_to_bin
+from sklearn.cluster import KMeans
 
 NUM_SAMPLE_TRAIN = 500000
 NUM_SAMPLE_TEST = 40000
@@ -60,6 +62,17 @@ def sample_center(labels, expected_label):
 
 	# get indexes where the label matches our expected label
 	i, j, k = np.where(labels == expected_label)
+
+	# sample an index at random and return it as a tuple
+	ri = np.random.randint(0, len(i))
+
+	return i[ri], j[ri], k[ri]
+
+def sample_center_within_cluster(labels, expected_label, clusters, expected_cluster):
+
+	# get indexes where the label matches our expected label 
+	# and the cluster matches our expected cluster
+	i, j, k = np.where((labels == expected_label) & (clusters == expected_cluster))
 
 	# sample an index at random and return it as a tuple
 	ri = np.random.randint(0, len(i))
@@ -137,6 +150,52 @@ def make_dataset_with_two_channels(c1, c2, labs):
 	
 	return train, train_labels
 
+def make_dataset_with_two_channels_kmeans(c1, c2, labs):
+
+	n = c1.shape[0]
+
+	train = []
+	train_labels = []
+	count = 1
+	for i in range(n):
+
+		# Do kmeans and find class with higher intensity
+		kmeans_i = KMeans(n_clusters=2).fit(c1[i].reshape((512*512*20,1)))
+		cluster_labels = kmeans_i.labels_.reshape((512,512,20))
+		hi_cluster = np.argmax(kmeans_i.cluster_centers_)
+
+		for j in range(int(NUM_SAMPLE_TRAIN/n)):
+
+			if count % 200 == 0:
+				print('extracting example {0}'.format(count))
+
+			# generate random label and center based on radom label
+			label = np.random.randint(2)
+			center = sample_center_within_cluster(labs[i], label, cluster_labels, hi_cluster)
+
+			# extract patches from channels
+			c1patch = extract_patch(c1[i], center)
+			c2patch = extract_patch(c2[i], center)
+
+			# concatenate the patches
+			patch = np.concatenate((c1patch[...,np.newaxis], c2patch[...,np.newaxis]), axis=3)
+			# append to datasets
+			train.append(patch)
+			train_labels.append(label)
+
+			# increment counter
+			count += 1
+
+	# make into np arrays
+	train , train_labels = np.array(train), np.array(train_labels)
+
+	# shuffle 
+	p = np.random.permutation(NUM_SAMPLE_TRAIN)
+	train = train[p]
+	train_labels = train_labels[p]
+	
+	return train, train_labels
+
 if __name__ == '__main__':
 
 	# load images and labels
@@ -144,9 +203,27 @@ if __name__ == '__main__':
 	pre_images = np.load('../../data/datasets/pre_images.npy')
 
 	c1, c2, labs = images_and_labels[:,0,:,:,:], pre_images, images_and_labels[:,1,:,:,:]
-	train, train_labels = make_dataset_with_two_channels(c1, c2, labs)
+	imgs, labels = make_dataset_with_two_channels_kmeans(c1, c2, labs)
+
+	imgs1 = imgs[:100000,:,:,:,:]
+	imgs2 = imgs[100000:200000,:,:,:,:]
+	imgs3 = imgs[200000:300000,:,:,:,:]
+	imgs4 = imgs[300000:400000,:,:,:,:]
+	imgs5 = imgs[400000:500000,:,:,:,:]
 	
-	np.save('../../data/datasets/train_2ch_big', np.array(train))
-	np.save('../../data/datasets/train_labels_2ch_big', np.array(train_labels))
+	labels1 = labels[:100000]
+	labels2 = labels[100000:200000]
+	labels3 = labels[200000:300000]
+	labels4 = labels[300000:400000]
+	labels5 = labels[400000:500000]	
+
+	flatten_and_bin(imgs1, labels1, '../../data/datasets/bins/train_and_label_kmeans_batch_1.bin')
+	flatten_and_bin(imgs2, labels2, '../../data/datasets/bins/train_and_label_kmeans_batch_2.bin')
+	flatten_and_bin(imgs3, labels3, '../../data/datasets/bins/train_and_label_kmeans_batch_3.bin')
+	flatten_and_bin(imgs4, labels4, '../../data/datasets/bins/train_and_label_kmeans_batch_4.bin')
+	flatten_and_bin(imgs5, labels5, '../../data/datasets/bins/train_and_label_kmeans_batch_5.bin')
+	
+	#np.save('../../data/datasets/train_2ch_big', np.array(train))
+	#np.save('../../data/datasets/train_labels_2ch_big', np.array(train_labels))
 
 	
