@@ -58,7 +58,7 @@ def eval_once(saver, summary_writer, ops, summary_op):
       true_count = 0  # Count sthe number of correct predictions.
       total_sample_count = num_iter * FLAGS.batch_size
       step = 0
-      preds = []
+      # preds = []
       logits = []
 
       while step < num_iter and not coord.should_stop():
@@ -66,7 +66,7 @@ def eval_once(saver, summary_writer, ops, summary_op):
         predictions = sess.run(ops)
         # Extend the predictions array with the predictions from the current batch
         #preds.extend(predictions[1].indices.flatten())
-        preds.append(predictions[1].indices)
+        # preds.append(predictions[1].indices)
 
         # Append the logits for the current batch
         logits.append(predictions[1].values)
@@ -79,10 +79,10 @@ def eval_once(saver, summary_writer, ops, summary_op):
           print("Processing batch {0}.".format(step))
 
       # Save predictions
-      np.save('../preds/img8d11_2ch_big_preds', preds)
+      # np.save('../preds/img8d11_2ch_big_preds', preds)
 
       # Save logits
-      np.save('../preds/img8d11_2ch_big_logits', logits)
+      np.save('../preds/img8d9_2ch_big_logits', logits)
       
       # Compute precision @ 1.
       print(true_count)

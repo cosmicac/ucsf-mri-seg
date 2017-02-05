@@ -20,7 +20,7 @@ if __name__ == '__main__':
 	iml = np.load('../../data/datasets/images_and_labels.npy')
 
 	# load logits and softmax them
-	logs = load_logits(8, 11, '2ch_big_logits')
+	logs = load_logits(8, 9, '2ch_big_logits')
 	p = softmax(logs)
 
 	dices_raw = []
@@ -28,8 +28,8 @@ if __name__ == '__main__':
 	ppvs_raw = []
 	ppvs_pp = []
 
-	labs = iml[8,1,:,:,11]
-	thresholds = np.linspace(0.1, 0.9999, 50)
+	labs = iml[8,1,:,:,9]
+	thresholds = np.linspace(0.1, 0.90, 20)
 
 	# loop through thresholds and save
 	for t in thresholds:
@@ -38,6 +38,7 @@ if __name__ == '__main__':
 		m = mask(p, t)
 		m_pp = pp.postprocess(m)
 
+		"""
 		metrics_raw = pp.calc_metrics(labs, m)
 		metrics_pp = pp.calc_metrics(labs, m_pp)
 
@@ -45,16 +46,18 @@ if __name__ == '__main__':
 		dices_pp.append(metrics_pp['dsc'])
 		ppvs_raw.append(metrics_raw['ppv'])
 		ppvs_pp.append(metrics_pp['ppv'])
+		"""
 
+		pp.save_pre_post_given_mask(iml, 8, 9, m, '500t{0}'.format(int(t*10000)))
 
-		#pp.save_pre_post_given_mask(iml, 8, 11, m, '500t{0}'.format(int(t*10000)))
-
+	"""
 	plt.plot(thresholds, ppvs_raw, label='raw ppv', color='r')
 	plt.plot(thresholds, ppvs_pp, label='postprocessed ppv', color='m')
 	plt.plot(thresholds, dices_raw, label='raw dsc', color='c')
 	plt.plot(thresholds, dices_pp, label='postprocessed dsc', color= 'g')
 	plt.xlabel('Threshold')
 	plt.ylabel('Values')
-	plt.title('PPV/DSC vs threshold for Image 8 Depth 11')
-	plt.legend(loc='bottom left')
+	plt.title('PPV/DSC vs threshold for Image 8 Depth 9')
+	plt.legend(loc='best')
 	plt.show()
+	"""
