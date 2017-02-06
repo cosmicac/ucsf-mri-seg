@@ -217,11 +217,11 @@ if __name__ == '__main__':
 	labels4 = labels[300000:400000]
 	labels5 = labels[400000:500000]	
 
-	flatten_and_bin(imgs1, labels1, '../../data/datasets/bins/train_and_label_kmeans_batch_1.bin')
-	flatten_and_bin(imgs2, labels2, '../../data/datasets/bins/train_and_label_kmeans_batch_2.bin')
-	flatten_and_bin(imgs3, labels3, '../../data/datasets/bins/train_and_label_kmeans_batch_3.bin')
-	flatten_and_bin(imgs4, labels4, '../../data/datasets/bins/train_and_label_kmeans_batch_4.bin')
-	flatten_and_bin(imgs5, labels5, '../../data/datasets/bins/train_and_label_kmeans_batch_5.bin')
+	npy_to_bin.flatten_and_bin(imgs1, labels1, '../../data/datasets/bins/train_and_label_kmeans_batch_1.bin')
+	npy_to_bin.flatten_and_bin(imgs2, labels2, '../../data/datasets/bins/train_and_label_kmeans_batch_2.bin')
+	npy_to_bin.flatten_and_bin(imgs3, labels3, '../../data/datasets/bins/train_and_label_kmeans_batch_3.bin')
+	npy_to_bin.flatten_and_bin(imgs4, labels4, '../../data/datasets/bins/train_and_label_kmeans_batch_4.bin')
+	npy_to_bin.flatten_and_bin(imgs5, labels5, '../../data/datasets/bins/train_and_label_kmeans_batch_5.bin')
 	
 	#np.save('../../data/datasets/train_2ch_big', np.array(train))
 	#np.save('../../data/datasets/train_labels_2ch_big', np.array(train_labels))

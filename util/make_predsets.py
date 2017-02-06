@@ -1,6 +1,8 @@
 import numpy as np
 import make_datasets
-import npy_to_bin 
+import npy_to_bin
+from sklearn.cluster import KMeans
+
 
 def imgslice_to_patch_arr(imgc1, imgc2, depth):
 	
@@ -24,6 +26,32 @@ def imgslice_to_patch_arr(imgc1, imgc2, depth):
 
 	return np.array(patch_arr) 
 
+def imgslice_to_patch_arr_kmeans(imgc1, imgc2, depth, cluster_labels, cluster_wanted):
+	
+	h, w, d = imgc1.shape
+	patch_arr = []
+	count = 0
+
+	for i in range(h):
+		for j in range(w):
+
+			if count % 25000 == 0:
+				print("Extracting patch {0}.".format(count)) 
+
+			if (cluster_labels[i,j] == cluster_wanted):
+				patch_ijc1 = make_datasets.extract_patch(imgc1, center=(i,j,depth))
+				patch_ijc2 = make_datasets.extract_patch(imgc2, center=(i,j,depth))
+
+				# concatenate the patches
+				patch_ij = np.concatenate((patch_ijc1[...,np.newaxis], patch_ijc2[...,np.newaxis]), axis=3)
+				patch_arr.append(patch_ij)
+
+			count += 1
+
+	print(len(patch_arr))
+
+	return np.array(patch_arr) 
+
 def predict_slice(images_and_labels, pre_images, img_number, depth, save_path):
 	c1 = images_and_labels[img_number, 0, :, :, :]
 	c2 = pre_images[img_number]
@@ -31,6 +59,19 @@ def predict_slice(images_and_labels, pre_images, img_number, depth, save_path):
 	img = imgslice_to_patch_arr(c1, c2, depth).astype('uint16')
 	npy_to_bin.flatten_and_bin(img, img_labels, save_path)
 
+def predict_slice_kmeans(images_and_labels, pre_images, img_number, depth, save_path):
+	c1 = images_and_labels[img_number, 0, :, :, :]
+	c2 = pre_images[img_number]
+	img_labels = images_and_labels[img_number, 1, :, :, depth].astype('uint16')
+
+	depth_slice = c1[:,:,depth]
+	km = KMeans(n_clusters=2).fit(depth_slice.reshape((512*512,1)))
+	cluster_labels = km.labels_.reshape((512,512))
+	hi_cluster = np.argmax(km.cluster_centers_)
+
+	img_labels = img_labels[cluster_labels == hi_cluster]
+	img = imgslice_to_patch_arr_kmeans(c1, c2, depth, cluster_labels, hi_cluster).astype('uint16')
+	npy_to_bin.flatten_and_bin(img, img_labels, save_path)
 
 if __name__ == '__main__':
 
@@ -48,9 +89,9 @@ if __name__ == '__main__':
 
 	npy_to_bin.flatten_and_bin(img8d11, img8d11_labels, '../../data/datasets/bins/img8d10_and_label_2ch_batch_1.bin')
 	"""
-	
-	predict_slice(images_and_labels, pre_images, 8, 10, '../../data/datasets/bins/img8d10_and_label_2ch_batch_1.bin')
-	predict_slice(images_and_labels, pre_images, 8, 11, '../../data/datasets/bins/img8d11_and_label_2ch_batch_1.bin')
+	predict_slice_kmeans(images_and_labels, pre_images, 8, 9, '../../data/datasets/bins/img8d9_and_label_kmeans_batch_1.bin')
+	predict_slice_kmeans(images_and_labels, pre_images, 8, 10, '../../data/datasets/bins/img8d10_and_label_kmeans_batch_1.bin')
+	predict_slice_kmeans(images_and_labels, pre_images, 8, 11, '../../data/datasets/bins/img8d11_and_label_kmeans_batch_1.bin')
 	
 
 	"""

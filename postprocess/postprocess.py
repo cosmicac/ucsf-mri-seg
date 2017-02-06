@@ -63,9 +63,10 @@ if __name__ == '__main__':
 	iml = np.load('../../data/datasets/images_and_labels.npy')
 
 	#save_true_pre_post_images(iml, 8, 10, '2ch_imgs')
-	#save_true_pre_post_images(iml, 8, 9, '2ch_imgs')
+	save_true_pre_post_images(iml, 8, 9, 'kmeans')
 
 	
+	"""
 	true_labs9 = iml[8,1,:,:,9]
 	pred_labs9 = load_preds(8, 9, '2ch_big')
 
@@ -96,4 +97,4 @@ if __name__ == '__main__':
 
 	print("Depth 11 post")
 	print(calc_metrics(true_labs11, pred_labs11_post))
-	
+	"""
