@@ -21,7 +21,11 @@ def postprocess(img):
 
 def save_true_pre_post_images(iml, i, d, tag):
 	img, img_labels = get_img_and_labels(iml, i, d)
-	p = np.load('../../preds/img{0}d{1}_{2}_preds.npy'.format(i,d,tag)).reshape((512, 512))
+	p = np.load('../../preds/img{0}d{1}_{2}_preds.npy'.format(i,d,tag))
+	
+	if p.shape != img.shape:
+		p = p.reshape(img.shape)
+
 	p_post = postprocess(p)
 	overlay_mask_and_save(img, img_labels, '../../pictures/img{0}d{1}_{2}_seg_true'.format(i,d,tag))
 	overlay_mask_and_save(img, p, '../../pictures/img{0}d{1}_{2}_seg_pre'.format(i,d,tag))
@@ -62,8 +66,9 @@ if __name__ == '__main__':
 	# load all images and labels
 	iml = np.load('../../data/datasets/images_and_labels.npy')
 
-	#save_true_pre_post_images(iml, 8, 10, '2ch_imgs')
-	save_true_pre_post_images(iml, 8, 9, 'kmeans')
+	save_true_pre_post_images(iml, 8, 10, 'kmeans')
+	save_true_pre_post_images(iml, 8, 11, 'kmeans')
+	#save_true_pre_post_images(iml, 8, 9, 'kmeans')
 
 	
 	"""

@@ -2,7 +2,7 @@ import numpy as np
 import scipy.io as sio
 import os.path
 import time
-import npy_to_bin
+import util.npy_to_bin as npy_to_bin
 from sklearn.cluster import KMeans
 
 NUM_SAMPLE_TRAIN = 500000
@@ -62,17 +62,6 @@ def sample_center(labels, expected_label):
 
 	# get indexes where the label matches our expected label
 	i, j, k = np.where(labels == expected_label)
-
-	# sample an index at random and return it as a tuple
-	ri = np.random.randint(0, len(i))
-
-	return i[ri], j[ri], k[ri]
-
-def sample_center_within_cluster(labels, expected_label, clusters, expected_cluster):
-
-	# get indexes where the label matches our expected label 
-	# and the cluster matches our expected cluster
-	i, j, k = np.where((labels == expected_label) & (clusters == expected_cluster))
 
 	# sample an index at random and return it as a tuple
 	ri = np.random.randint(0, len(i))
@@ -141,7 +130,7 @@ def make_dataset_with_two_channels(c1, c2, labs):
 			count += 1
 
 	# make into np arrays
-	train , train_labels = np.array(train), np.array(train_labels)
+	train , train_labels = np.array(train).astype('uint16'), np.array(train_labels).astype('uint16')
 
 	# shuffle 
 	p = np.random.permutation(NUM_SAMPLE_TRAIN)
@@ -149,6 +138,30 @@ def make_dataset_with_two_channels(c1, c2, labs):
 	train_labels = train_labels[p]
 	
 	return train, train_labels
+
+"""
+Input: 	full 512x512x20 image labels, 
+		sequence of expected labels (sequence of 0's and 1's)
+		full 512x512x20 cluster labels
+		the expected cluster to take
+output: sequence of patch centers that match the input sequence of expected_labels
+"""
+def sample_centers_within_cluster(labels, expected_labels, clusters, expected_cluster):
+
+	# map the possible labels to the possible center indexes 
+	labs_to_centers = {}
+	for l in np.unique(expected_labels):
+		labs_to_centers[l] = np.where((labels == l) & (clusters == expected_cluster))
+
+	# randomly select patch centers
+	centers = []
+	for el in expected_labels:
+		i, j, k = labs_to_centers[el]
+		ri = np.random.randint(0, len(i))
+		centers.append((i[ri], j[ri], k[ri]))
+
+	return centers
+
 
 def make_dataset_with_two_channels_kmeans(c1, c2, labs):
 
@@ -164,30 +177,35 @@ def make_dataset_with_two_channels_kmeans(c1, c2, labs):
 		cluster_labels = kmeans_i.labels_.reshape((512,512,20))
 		hi_cluster = np.argmax(kmeans_i.cluster_centers_)
 
-		for j in range(int(NUM_SAMPLE_TRAIN/n)):
+		# generate labels 50/50 positive negative
+		train_labels_i = np.random.randint(2, size=int(NUM_SAMPLE_TRAIN/n))
+		train_labels.extend(train_labels_i)
+
+		# get centers that correspond to generated labels
+		centers = sample_centers_within_cluster(labs[i], train_labels_i, cluster_labels, hi_cluster)
+
+		# go and extract the patches for each center and add to our training array
+		for c in centers:
 
 			if count % 200 == 0:
 				print('extracting example {0}'.format(count))
 
-			# generate random label and center based on radom label
-			label = np.random.randint(2)
-			center = sample_center_within_cluster(labs[i], label, cluster_labels, hi_cluster)
-
 			# extract patches from channels
-			c1patch = extract_patch(c1[i], center)
-			c2patch = extract_patch(c2[i], center)
+			c1patch = extract_patch(c1[i], c)
+			c2patch = extract_patch(c2[i], c)
 
 			# concatenate the patches
 			patch = np.concatenate((c1patch[...,np.newaxis], c2patch[...,np.newaxis]), axis=3)
 			# append to datasets
 			train.append(patch)
-			train_labels.append(label)
 
 			# increment counter
 			count += 1
 
 	# make into np arrays
-	train , train_labels = np.array(train), np.array(train_labels)
+	train , train_labels = np.array(train, dtype='uint16'), np.array(train_labels, dtype='uint16')
+	print(train.dtype)
+	print(train_labels.dtype)
 
 	# shuffle 
 	p = np.random.permutation(NUM_SAMPLE_TRAIN)
@@ -204,6 +222,9 @@ if __name__ == '__main__':
 
 	c1, c2, labs = images_and_labels[:,0,:,:,:], pre_images, images_and_labels[:,1,:,:,:]
 	imgs, labels = make_dataset_with_two_channels_kmeans(c1, c2, labs)
+	
+	print(imgs.dtype)
+	print(labels.dtype)
 
 	imgs1 = imgs[:100000,:,:,:,:]
 	imgs2 = imgs[100000:200000,:,:,:,:]
@@ -223,6 +244,7 @@ if __name__ == '__main__':
 	npy_to_bin.flatten_and_bin(imgs4, labels4, '../../data/datasets/bins/train_and_label_kmeans_batch_4.bin')
 	npy_to_bin.flatten_and_bin(imgs5, labels5, '../../data/datasets/bins/train_and_label_kmeans_batch_5.bin')
 	
+
 	#np.save('../../data/datasets/train_2ch_big', np.array(train))
 	#np.save('../../data/datasets/train_labels_2ch_big', np.array(train_labels))
 

@@ -2,11 +2,10 @@ from __future__ import division
 from datetime import datetime
 import math
 import time
-
 import numpy as np
 import tensorflow as tf
-
 import raseg_model
+import util.make_predsets as mp
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -22,8 +21,10 @@ tf.app.flags.DEFINE_integer('num_examples', 262144,
                             """Number of examples to run.""")
 tf.app.flags.DEFINE_boolean('run_once', True,
                          """Whether to run eval only once.""")
+tf.app.flags.DEFINE_boolean('predict_slice', True,
+                         """Whether to predict a slice and save predictions""")
 
-def eval_once(saver, summary_writer, ops, summary_op):
+def eval_once(saver, summary_writer, ops, summary_op, nexamples=None):
   """Run Eval once.
   Args:
     saver: Saver.
@@ -31,6 +32,10 @@ def eval_once(saver, summary_writer, ops, summary_op):
     ops: Ops to run
     summary_op: Summary op.
   """
+
+  preds = []
+  # logits = []
+
   with tf.Session() as sess:
     ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
     if ckpt and ckpt.model_checkpoint_path:
@@ -54,18 +59,20 @@ def eval_once(saver, summary_writer, ops, summary_op):
         threads.extend(qr.create_threads(sess, coord=coord, daemon=True,
                                          start=True))
 
-      num_iter = int(math.ceil(FLAGS.num_examples / FLAGS.batch_size))
+      if not nexamples:
+        nexamples = FLAGS.num_examples
+
+      num_iter = int(math.ceil(nexamples / FLAGS.batch_size))
       true_count = 0  # Count sthe number of correct predictions.
       total_sample_count = num_iter * FLAGS.batch_size
       step = 0
-      preds = []
-      # logits = []
 
       while step < num_iter and not coord.should_stop():
         # Run the ops and whatever is needed to return their output
         predictions = sess.run(ops)
         # Extend the predictions array with the predictions from the current batch
-        preds.extend(predictions[1].indices.flatten())
+        if FLAGS.predict_slice:
+          preds.extend(predictions[1].indices.flatten())
         # preds.append(predictions[1].indices)
 
         # Append the logits for the current batch
@@ -79,7 +86,7 @@ def eval_once(saver, summary_writer, ops, summary_op):
           print("Processing batch {0}.".format(step))
 
       # Save predictions
-      np.save('../preds/img8d9_kmeans_preds', preds)
+      # np.save('../preds/img8d9_kmeans_preds', preds)
 
       # Save logits
       # np.save('../preds/img8d9_2ch_big_logits', logits)
@@ -100,6 +107,8 @@ def eval_once(saver, summary_writer, ops, summary_op):
 
     coord.request_stop()
     coord.join(threads, stop_grace_period_secs=10)
+
+  return preds
 
 
 def evaluate():
@@ -131,11 +140,39 @@ def evaluate():
     summary_writer = tf.summary.FileWriter(FLAGS.eval_dir, g)
 
     while True:
-      eval_once(saver, summary_writer, [top_k_op, top_k_op_vals], summary_op)
-      #eval_once(saver, summary_writer, [top_k_op], summary_op)
+
+      if FLAGS.predict_slice:
+
+        # load images, both channels
+        images_and_labels = np.load('../data/datasets/images_and_labels.npy')
+        pre_images = np.load('../data/datasets/pre_images.npy')
+
+        # make predset and save the binary
+        cluster_labels, hi_cluster = mp.predict_slice_kmeans(images_and_labels, pre_images, 8, 11,
+                                      '../data/datasets/bins/img8d11_and_label_kmeans_batch_1.bin')
+
+        i, j = np.where(cluster_labels == hi_cluster)
+        preds = eval_once(saver, summary_writer, [top_k_op, top_k_op_vals], summary_op, nexamples=len(i))
+
+        print(len(i))
+        print(len(preds))
+        print(np.sum(preds))
+
+        # make the mask
+        mask = np.zeros(cluster_labels.shape)
+        for k in range(len(i)):
+          mask[i[k], j[k]] = preds[k]
+
+        np.save('../preds/img8d11_kmeans_preds', mask)
+
+      else:
+        eval_once(saver, summary_writer, [top_k_op, top_k_op_vals], summary_op)
+        #eval_once(saver, summary_writer, [top_k_op], summary_op)
+
       if FLAGS.run_once:
         break
       time.sleep(FLAGS.eval_interval_secs)
+
 
 
 def main(argv=None):  # pylint: disable=unused-argument

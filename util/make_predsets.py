@@ -1,6 +1,6 @@
 import numpy as np
-import make_datasets
-import npy_to_bin
+import util.make_datasets as make_datasets
+import util.npy_to_bin as npy_to_bin
 from sklearn.cluster import KMeans
 
 
@@ -69,9 +69,11 @@ def predict_slice_kmeans(images_and_labels, pre_images, img_number, depth, save_
 	cluster_labels = km.labels_.reshape((512,512))
 	hi_cluster = np.argmax(km.cluster_centers_)
 
-	img_labels = img_labels[cluster_labels == hi_cluster]
+	img_labels = img_labels[cluster_labels == hi_cluster].astype('uint16')
 	img = imgslice_to_patch_arr_kmeans(c1, c2, depth, cluster_labels, hi_cluster).astype('uint16')
 	npy_to_bin.flatten_and_bin(img, img_labels, save_path)
+
+	return cluster_labels, hi_cluster
 
 if __name__ == '__main__':
 
