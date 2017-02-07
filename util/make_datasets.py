@@ -220,6 +220,10 @@ if __name__ == '__main__':
 	images_and_labels = np.load('../../data/datasets/images_and_labels.npy')
 	pre_images = np.load('../../data/datasets/pre_images.npy')
 
+	ids = np.concatenate((np.arange(5), np.arange(12,32)))
+	images_and_labels = images_and_labels[ids,:,:,:,:]
+	assert images_and_labels.shape[0] == 25
+
 	c1, c2, labs = images_and_labels[:,0,:,:,:], pre_images, images_and_labels[:,1,:,:,:]
 	imgs, labels = make_dataset_with_two_channels_kmeans(c1, c2, labs)
 	
@@ -238,11 +242,11 @@ if __name__ == '__main__':
 	labels4 = labels[300000:400000]
 	labels5 = labels[400000:500000]	
 
-	npy_to_bin.flatten_and_bin(imgs1, labels1, '../../data/datasets/bins/train_and_label_kmeans_batch_1.bin')
-	npy_to_bin.flatten_and_bin(imgs2, labels2, '../../data/datasets/bins/train_and_label_kmeans_batch_2.bin')
-	npy_to_bin.flatten_and_bin(imgs3, labels3, '../../data/datasets/bins/train_and_label_kmeans_batch_3.bin')
-	npy_to_bin.flatten_and_bin(imgs4, labels4, '../../data/datasets/bins/train_and_label_kmeans_batch_4.bin')
-	npy_to_bin.flatten_and_bin(imgs5, labels5, '../../data/datasets/bins/train_and_label_kmeans_batch_5.bin')
+	npy_to_bin.flatten_and_bin(imgs1, labels1, '../../data/datasets/bins/train_and_label_kmeans_partial_batch_1.bin')
+	npy_to_bin.flatten_and_bin(imgs2, labels2, '../../data/datasets/bins/train_and_label_kmeans_partial_batch_2.bin')
+	npy_to_bin.flatten_and_bin(imgs3, labels3, '../../data/datasets/bins/train_and_label_kmeans_partial_batch_3.bin')
+	npy_to_bin.flatten_and_bin(imgs4, labels4, '../../data/datasets/bins/train_and_label_kmeans_partial_batch_4.bin')
+	npy_to_bin.flatten_and_bin(imgs5, labels5, '../../data/datasets/bins/train_and_label_kmeans_partial_batch_5.bin')
 	
 
 	#np.save('../../data/datasets/train_2ch_big', np.array(train))

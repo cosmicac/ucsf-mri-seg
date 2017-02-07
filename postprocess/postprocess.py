@@ -66,10 +66,34 @@ if __name__ == '__main__':
 	# load all images and labels
 	iml = np.load('../../data/datasets/images_and_labels.npy')
 
-	save_true_pre_post_images(iml, 8, 10, 'kmeans')
-	save_true_pre_post_images(iml, 8, 11, 'kmeans')
-	#save_true_pre_post_images(iml, 8, 9, 'kmeans')
 
+	save_true_pre_post_images(iml, 5, 8, 'kmeans_partial')
+
+	"""
+	for i in range(20):
+		save_true_pre_post_images(iml, 8, i, 'kmeans_partial')
+	
+	with open("img8_kmeans_partial_metrics.txt", "w") as text_file:
+		for i in range(20):
+			true_labs = iml[8,1,:,:,i]
+			pred_labs = load_preds(8, i, 'kmeans')
+			pred_labs_post = postprocess(pred_labs)
+
+			raw_metrics = calc_metrics(true_labs, pred_labs)
+			pp_metrics = calc_metrics(true_labs, pred_labs_post)
+
+			print("Raw Metrics Depth {0}:".format(i), file=text_file)
+			for m, v in raw_metrics.items():
+				print("\t{0} : {1}".format(m, v), file=text_file)
+
+			print(" ", file=text_file)
+
+			print("Post-processed Metrics Depth {0}:".format(i), file=text_file)
+			for m, v in pp_metrics.items():
+				print("\t{0} : {1}".format(m, v), file=text_file)
+
+			print("\n", file=text_file)
+	"""
 	
 	"""
 	true_labs9 = iml[8,1,:,:,9]
