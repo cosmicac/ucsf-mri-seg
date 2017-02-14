@@ -115,11 +115,12 @@ def inputs(eval_data, data_dir, batch_size):
     labels: Labels. 1D tensor of [batch_size] size.
   """
   if not eval_data:
-    filenames = [os.path.join(data_dir, 'train_and_label_kmeans_batch_{0}.bin'.format(i))
+    filenames = [os.path.join(data_dir, 'train_and_label_kmeans_partial_batch_{0}.bin'.format(i))
                  for i in xrange(1, 6)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
   else:
-    filenames = [os.path.join(data_dir, 'img8d11_and_label_kmeans_batch_{0}.bin'.format(i))
+    filenames = [os.path.join(data_dir,
+     'img{0}d{1}_and_label_kmeans_batch_{2}.bin'.format(5, 8, i))
                  for i in xrange(1, 2)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
