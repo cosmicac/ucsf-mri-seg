@@ -6,6 +6,7 @@ import util.npy_to_bin as npy_to_bin
 from sklearn.cluster import KMeans
 
 NUM_SAMPLE_TRAIN = 500000
+NUM_SAMPLE_BMEL = 155000
 NUM_SAMPLE_TEST = 40000
 PATCH_SIZE = (32, 32, 8)
 PATCH_MARGINS = (int(PATCH_SIZE[0]/2), int(PATCH_SIZE[1]/2), int(PATCH_SIZE[2]/2))
@@ -66,7 +67,7 @@ def sample_center(labels, expected_label):
 	# sample an index at random and return it as a tuple
 	ri = np.random.randint(0, len(i))
 
-	return i[ri], j[ri], k[ri]
+	return i[ri], j[ri], k[ri]	
 
 def make_dataset_one_channel():
 
@@ -214,6 +215,41 @@ def make_dataset_with_two_channels_kmeans(c1, c2, labs):
 	
 	return train, train_labels
 
+def make_bme_dataset_t2_pre(t2imgs, pre_labels):
+	
+	n = t2imgs.shape[0]
+	train = []
+	train_labels = []
+	count = 1
+
+	for i in range(n):
+
+		labels = pre_labels[i]
+		centers =  zip(*np.where(labels == 1))
+
+		for c in centers:
+
+			if count % 5000 == 0: 
+				print('extracting example {0}'.format(count))
+	
+			patch = extract_patch(t2imgs[i], c)
+			train.append(patch)
+			train_labels.append(2)
+
+			count += 1
+
+	# make into np arrays
+	train , train_labels = np.array(train, dtype='uint16'), np.array(train_labels, dtype='uint16')
+	print(train.dtype)
+	print(train_labels.dtype)
+
+	# shuffle 
+	p = np.random.permutation(train.shape[0])
+	train = train[p]
+	train_labels = train_labels[p]
+
+	return train, train_labels
+
 if __name__ == '__main__':
 
 	# load images and labels
@@ -222,6 +258,7 @@ if __name__ == '__main__':
 
 	ids = np.concatenate((np.arange(5), np.arange(12,32)))
 	images_and_labels = images_and_labels[ids,:,:,:,:]
+
 	assert images_and_labels.shape[0] == 25
 
 	c1, c2, labs = images_and_labels[:,0,:,:,:], pre_images, images_and_labels[:,1,:,:,:]
