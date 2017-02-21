@@ -11,7 +11,7 @@ def load_preds(i, d, tag):
 
 def overlay_mask_and_save(img, mask, filename):
 	plt.imshow(img, cmap='bone')
-	plt.imshow(mask, cmap='bwr', interpolation='None', alpha=0.2)
+	plt.imshow(mask, cmap='inferno', interpolation='None', alpha=0.2)
 	plt.savefig(filename, format='png')
 
 def postprocess(img):
@@ -68,12 +68,15 @@ if __name__ == '__main__':
 	iml = np.load('../../data/datasets/images_and_labels.npy')
 
 
-	save_true_pre_post_images(iml, 5, 8, 'kmeans_partial')
+	save_true_pre_post_images(iml, 8, 11, 'bmet1postreg')
+	"""
 	true_labs = iml[5,1,:,:,8]
 	pred_labs = load_preds(5, 8, 'kmeans_partial')
 	pp_labs = postprocess(pred_labs)
 	print(calc_metrics(true_labs, pred_labs))
 	print(calc_metrics(true_labs,pp_labs))
+	"""
+
 
 	"""
 	for i in range(20):

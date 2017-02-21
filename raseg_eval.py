@@ -12,8 +12,8 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string('eval_dir', '../models/raseg_eval',
                            """Directory where to write event logs.""")
 tf.app.flags.DEFINE_string('eval_data', 'test',
-                           """Either 'train_eval' or 'train_eval'.""")
-tf.app.flags.DEFINE_string('checkpoint_dir', '../models/raseg_train_kmeans_partial',
+                           """Either 'train_eval' or 'test'.""")
+tf.app.flags.DEFINE_string('checkpoint_dir', '../models/raseg_train_bmet1postreg',
                            """Directory where to read model checkpoints.""")
 tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 5,
                             """How often to run the eval.""")
@@ -23,9 +23,9 @@ tf.app.flags.DEFINE_boolean('run_once', True,
                          """Whether to run eval only once.""")
 tf.app.flags.DEFINE_boolean('predict_slice', True,
                          """Whether to predict a slice and save predictions""")
-tf.app.flags.DEFINE_integer('imgn', 5,
+tf.app.flags.DEFINE_integer('imgn', 8,
                             """Image number.""")
-tf.app.flags.DEFINE_integer('depthn', 8,
+tf.app.flags.DEFINE_integer('depthn', 11,
                             """Depth number.""")
 
 def eval_once(saver, summary_writer, ops, summary_op, nexamples=None):
@@ -124,7 +124,7 @@ def evaluate():
 
     # make predset and save the binary
     cluster_labels, hi_cluster = mp.predict_slice_kmeans(images_and_labels, pre_images, FLAGS.imgn, FLAGS.depthn,
-                                  '../data/datasets/bins/img{0}d{1}_and_label_kmeans_batch_1.bin'.format(FLAGS.imgn, FLAGS.depthn))
+                                  '../data/datasets/bins/img{0}d{1}_and_label_bmet1postreg_batch_1.bin'.format(FLAGS.imgn, FLAGS.depthn))
 
   """Eval model for a number of steps."""
   with tf.Graph().as_default() as g:
@@ -170,7 +170,7 @@ def evaluate():
         for k in range(len(i)):
           mask[i[k], j[k]] = preds[k]
 
-        np.save('../preds/img{0}d{1}_kmeans_partial_preds'.format(FLAGS.imgn, FLAGS.depthn), mask)
+        np.save('../preds/img{0}d{1}_bmet1postreg_preds'.format(FLAGS.imgn, FLAGS.depthn), mask)
 
       else:
         eval_once(saver, summary_writer, [top_k_op, top_k_op_vals], summary_op)
