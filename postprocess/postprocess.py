@@ -9,9 +9,15 @@ def get_img_and_labels(iml, i, d):
 def load_preds(i, d, tag):
 	return np.load('../../preds/img{0}d{1}_{2}_preds.npy'.format(i,d,tag)).reshape((512,512))
 
+def load_preds_whole(i, tag):
+	preds = np.zeros((512,512,20))
+	for d in range(20):
+		preds[:,:,d] = np.load('../../preds/img{0}d{1}_{2}_preds.npy'.format(i,d,tag)).reshape((512,512))
+	return preds
+
 def overlay_mask_and_save(img, mask, filename):
 	plt.imshow(img, cmap='bone')
-	plt.imshow(mask, cmap='inferno', interpolation='None', alpha=0.2)
+	plt.imshow(mask, cmap='brg', interpolation='None', alpha=0.2)
 	plt.savefig(filename, format='png')
 
 def postprocess(img):
@@ -65,13 +71,14 @@ def calc_metrics(true_labs, pred_labs):
 if __name__ == '__main__':
 
 	# load all images and labels
-	iml = np.load('../../data/datasets/images_and_labels.npy')
+	iml = np.load('../../data/datasets/images_and_labels_bmesyn_regfix.npy')
 
 
-	save_true_pre_post_images(iml, 8, 11, 'bmet1postreg')
+	save_true_pre_post_images(iml, 9, 10, 'regfix')
+	
 	"""
-	true_labs = iml[5,1,:,:,8]
-	pred_labs = load_preds(5, 8, 'kmeans_partial')
+	true_labs = iml[8,1,:,:,11]
+	pred_labs = load_preds(5, 8, 'regfix')
 	pp_labs = postprocess(pred_labs)
 	print(calc_metrics(true_labs, pred_labs))
 	print(calc_metrics(true_labs,pp_labs))
@@ -82,12 +89,13 @@ if __name__ == '__main__':
 	for i in range(20):
 		save_true_pre_post_images(iml, 8, i, 'kmeans_partial')
 	"""
+	
 	"""
-	with open("img8_kmeans_partial_metrics.txt", "w") as text_file:
+	with open("img11_kmeans_partial_metrics.txt", "w") as text_file:
 		raws, pps = [], []
 		for i in range(20):
-			true_labs = iml[8,1,:,:,i]
-			pred_labs = load_preds(8, i, 'kmeans_partial')
+			true_labs = iml[11,1,:,:,i]
+			pred_labs = load_preds(11, i, 'kmeans_partial')
 			pred_labs_post = postprocess(pred_labs)
 
 			raw_metrics = calc_metrics(true_labs, pred_labs)
@@ -114,7 +122,7 @@ if __name__ == '__main__':
 
 		print("\n", file=text_file)
 		for k in pps[0]:
-			avg_k = np.mean([pps[i][k] for i in range(len(pps)) if math.isnan(raws[i][k]) is False])
+			avg_k = np.mean([pps[i][k] for i in range(len(pps)) if math.isnan(pps[i][k]) is False])
 			print("\tPost-processed {0}: {1}".format(k, avg_k), file=text_file)
 
 		print("Middle Averages\n\n", file=text_file)
@@ -125,13 +133,55 @@ if __name__ == '__main__':
 
 		print("\n", file=text_file)
 		for k in pps[0]:
-			avg_k = np.mean([pps[i][k] for i in range(4,15) if math.isnan(raws[i][k]) is False])
+			avg_k = np.mean([pps[i][k] for i in range(4,15) if math.isnan(pps[i][k]) is False])
 			print("\tPost-processed {0}: {1}".format(k, avg_k), file=text_file)
 
-		np.save("raw_metrics_img8_kmeans_partial", raws)
-		np.save("pp_metrics_img8_kmeans_partial", pps)
+		#np.save("raw_metrics_img8_kmeans_partial", raws)
+		#np.save("pp_metrics_img8_kmeans_partial", pps)
 	"""
-	
+
+	"""
+	with open("img11_kmeans_partial_metrics_whole.txt", "w") as text_file:			
+		true_labs = iml[11,1,:,:,:]
+		pred_labs = load_preds_whole(11, 'kmeans_partial')
+		pred_labs_post = postprocess(pred_labs)
+
+		true_labs_mid = true_labs[:,:,4:14]
+		pred_labs_mid = pred_labs[:,:,4:14]
+		pred_labs_mid_post = postprocess(pred_labs_mid)
+
+		raw_metrics = calc_metrics(true_labs, pred_labs)
+		pp_metrics = calc_metrics(true_labs, pred_labs_post)
+
+		raw_metrics_mid = calc_metrics(true_labs_mid, pred_labs_mid)
+		pp_metrics_mid = calc_metrics(true_labs_mid, pred_labs_mid_post)
+
+		print("Raw Metrics:", file=text_file)
+		for m, v in raw_metrics.items():
+			print("\t{0} : {1}".format(m, v), file=text_file)
+
+		print(" ", file=text_file)
+
+		print("Post-processed Metrics", file=text_file)
+		for m, v in pp_metrics.items():
+			print("\t{0} : {1}".format(m, v), file=text_file)
+
+		print(" ", file=text_file)
+		
+		print("Raw Metrics Mid (4-14):", file=text_file)
+		for m, v in raw_metrics_mid.items():
+			print("\t{0} : {1}".format(m, v), file=text_file)
+
+		print(" ", file=text_file)
+
+		print("Post-processed Metrics Mid (4-14):", file=text_file)
+		for m, v in pp_metrics_mid.items():
+			print("\t{0} : {1}".format(m, v), file=text_file)
+
+		print("\n", file=text_file)
+	"""
+
+
 	"""
 	true_labs9 = iml[8,1,:,:,9]
 	pred_labs9 = load_preds(8, 9, '2ch_big')

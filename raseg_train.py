@@ -6,7 +6,7 @@ import raseg_model
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('train_dir', '../models/raseg_train_bmet1postreg',
+tf.app.flags.DEFINE_string('train_dir', '../models/raseg_train_t2bmeonly',
                            """Directory where to write event logs """
                            """and checkpoint.""")
 tf.app.flags.DEFINE_integer('max_steps', 1000000,
@@ -34,7 +34,6 @@ def train():
     # Build a Graph that trains the model with one batch of examples and
     # updates the model parameters.
     train_op = raseg_model.train(loss, global_step)
-
     class _LoggerHook(tf.train.SessionRunHook):
       """Logs loss and runtime."""
 
