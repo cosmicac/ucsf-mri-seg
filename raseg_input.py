@@ -121,8 +121,8 @@ def inputs(eval_data, data_dir, batch_size, imgn=None, depthn=None):
   else:
 
     # eval needs imgn and depthn
-    assert imgn
-    assert depthn
+    # assert imgn
+    # assert depthn
 
     filenames = [os.path.join(data_dir,
      'img{0}d{1}_and_label_regfix_batch_{2}.bin'.format(imgn, depthn, i))

@@ -1,0 +1,374 @@
+Raw Metrics Depth 0:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+ 
+Post-processed Metrics Depth 0:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 1:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+ 
+Post-processed Metrics Depth 1:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 2:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+ 
+Post-processed Metrics Depth 2:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 3:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+ 
+Post-processed Metrics Depth 3:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 4:
+	ppv : 0.0
+	spec : 0.9999351501464844
+	sens : nan
+	acc : 0.9999351501464844
+	dsc : 0.0
+	npv : 1.0
+ 
+Post-processed Metrics Depth 4:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 5:
+	ppv : 0.0
+	spec : 0.9999351501464844
+	sens : nan
+	acc : 0.9999351501464844
+	dsc : 0.0
+	npv : 1.0
+ 
+Post-processed Metrics Depth 5:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 6:
+	ppv : 0.0
+	spec : 0.9999923706054688
+	sens : nan
+	acc : 0.9999923706054688
+	dsc : 0.0
+	npv : 1.0
+ 
+Post-processed Metrics Depth 6:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 7:
+	ppv : 0.0
+	spec : 0.9993019104003906
+	sens : nan
+	acc : 0.9993019104003906
+	dsc : 0.0
+	npv : 1.0
+ 
+Post-processed Metrics Depth 7:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 8:
+	ppv : 0.0
+	spec : 0.9988822937011719
+	sens : nan
+	acc : 0.9988822937011719
+	dsc : 0.0
+	npv : 1.0
+ 
+Post-processed Metrics Depth 8:
+	ppv : 0.0
+	spec : 0.9998970031738281
+	sens : nan
+	acc : 0.9998970031738281
+	dsc : 0.0
+	npv : 1.0
+
+
+Raw Metrics Depth 9:
+	ppv : 0.6435845213849287
+	spec : 0.9993312953763852
+	sens : 0.7117117117117117
+	acc : 0.9988441467285156
+	dsc : 0.6759358288770053
+	npv : 0.9995108024750338
+ 
+Post-processed Metrics Depth 9:
+	ppv : 0.9893992932862191
+	spec : 0.9999885364921666
+	sens : 0.6306306306306306
+	acc : 0.9993629455566406
+	dsc : 0.7702888583218707
+	npv : 0.9993737135350435
+
+
+Raw Metrics Depth 10:
+	ppv : 0.519406392694064
+	spec : 0.9983893860155858
+	sens : 0.6042496679946879
+	acc : 0.9972572326660156
+	dsc : 0.5586249232658073
+	npv : 0.9988594087297334
+ 
+Post-processed Metrics Depth 10:
+	ppv : 0.7969543147208121
+	spec : 0.9996939450860971
+	sens : 0.4169986719787517
+	acc : 0.9980201721191406
+	dsc : 0.5475152571926766
+	npv : 0.9983228271251194
+
+
+Raw Metrics Depth 11:
+	ppv : 0.3367003367003367
+	spec : 0.9984946203692383
+	sens : 0.4807692307692308
+	acc : 0.9976730346679688
+	dsc : 0.39603960396039606
+	npv : 0.9991741540814376
+ 
+Post-processed Metrics Depth 11:
+	ppv : 0.9534883720930233
+	spec : 0.999977075437095
+	sens : 0.2956730769230769
+	acc : 0.9988594055175781
+	dsc : 0.45137614678899085
+	npv : 0.9988817434116367
+
+
+Raw Metrics Depth 12:
+	ppv : 0.0
+	spec : 0.9999542236328125
+	sens : nan
+	acc : 0.9999542236328125
+	dsc : 0.0
+	npv : 1.0
+ 
+Post-processed Metrics Depth 12:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 13:
+	ppv : 0.0
+	spec : 0.9999885559082031
+	sens : nan
+	acc : 0.9999885559082031
+	dsc : 0.0
+	npv : 1.0
+ 
+Post-processed Metrics Depth 13:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 14:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+ 
+Post-processed Metrics Depth 14:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 15:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+ 
+Post-processed Metrics Depth 15:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 16:
+	ppv : 0.0
+	spec : 0.9999771118164062
+	sens : nan
+	acc : 0.9999771118164062
+	dsc : 0.0
+	npv : 1.0
+ 
+Post-processed Metrics Depth 16:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 17:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+ 
+Post-processed Metrics Depth 17:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 18:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+ 
+Post-processed Metrics Depth 18:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Raw Metrics Depth 19:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+ 
+Post-processed Metrics Depth 19:
+	ppv : nan
+	spec : 1.0
+	sens : nan
+	acc : 1.0
+	dsc : nan
+	npv : 1.0
+
+
+Averages
+
+
+	Raw ppv: 0.13633556825266632
+	Raw spec: 0.9997091034059317
+	Raw sens: 0.5989102034918768
+	Raw acc: 0.9995870590209961
+	Raw dsc: 0.1482363960093826
+	Raw npv: 0.9998772182643103
+
+
+	Post-processed ppv: 0.6849604950250137
+	Post-processed spec: 0.9999778280094593
+	Post-processed sens: 0.44776745984415306
+	Post-processed acc: 0.9998069763183594
+	Post-processed dsc: 0.4422950655758845
+	Post-processed npv: 0.9998289142035899
+Middle Averages
+
+
+	Raw ppv: 0.14996912507793295
+	Raw spec: 0.9994731778456568
+	Raw sens: 0.5989102034918768
+	Raw acc: 0.9992512789639559
+	Raw dsc: 0.16306003561032084
+	Raw npv: 0.9997767604805641
+
+
+	Post-processed ppv: 0.6849604950250137
+	Post-processed spec: 0.9999596872899261
+	Post-processed sens: 0.44776745984415306
+	Post-processed acc: 0.9996490478515625
+	Post-processed dsc: 0.4422950655758845
+	Post-processed npv: 0.999688934915618

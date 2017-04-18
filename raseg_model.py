@@ -9,8 +9,11 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_boolean('use_fp16', False, """Train model using 16-bit floating point.""")
 tf.app.flags.DEFINE_string('data_dir', '../data/datasets/bins', """Directory to the data binaries""")
 tf.app.flags.DEFINE_integer('batch_size', 128, """Number of voxel regions in our batch.""")
+tf.app.flags.DEFINE_integer('imgn', 3, """Image number.""")
+tf.app.flags.DEFINE_integer('depthn', 11, """Depth number.""")
 
 # constants
+NCHANNELS = raseg_input.NCHANNELS
 NUM_CLASSES = raseg_input.NUM_CLASSES
 NUM_EXAMPLES_EPOCH_TRAIN = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_EPOCH_EVAL = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
@@ -80,11 +83,14 @@ def inputs(eval_data):
   Raises:
     ValueError: If no data_dir
   """
+
   if not FLAGS.data_dir:
     raise ValueError('Please supply a data_dir')
   images, labels = raseg_input.inputs(eval_data=eval_data,
                                         data_dir=FLAGS.data_dir,
-                                        batch_size=FLAGS.batch_size)
+                                        batch_size=FLAGS.batch_size,
+                                        imgn=FLAGS.imgn,
+                                        depthn=FLAGS.depthn)
   if FLAGS.use_fp16:
     images = tf.cast(images, tf.float16)
     labels = tf.cast(labels, tf.float16)
@@ -95,7 +101,7 @@ def inference(voxel_regions):
 
 	# Conv1
 	with tf.variable_scope('conv1') as scope:
-		kernel = variable_with_weight_decay('weights', shape=[5, 5, 5, 2, 32], stddev=5e-2, wd=0.00)
+		kernel = variable_with_weight_decay('weights', shape=[5, 5, 5, NCHANNELS, 32], stddev=5e-2, wd=0.00)
 		conv = tf.nn.conv3d(voxel_regions, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
 		biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
 		sums = tf.nn.bias_add(conv, biases)

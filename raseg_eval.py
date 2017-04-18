@@ -13,7 +13,7 @@ tf.app.flags.DEFINE_string('eval_dir', '../models/raseg_eval',
                            """Directory where to write event logs.""")
 tf.app.flags.DEFINE_string('eval_data', 'test',
                            """Either 'train_eval' or 'test'.""")
-tf.app.flags.DEFINE_string('checkpoint_dir', '../models/raseg_train_regfix',
+tf.app.flags.DEFINE_string('checkpoint_dir', '../models/raseg_train_t2bmeonly',
                            """Directory where to read model checkpoints.""")
 tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 5,
                             """How often to run the eval.""")
@@ -23,10 +23,7 @@ tf.app.flags.DEFINE_boolean('run_once', True,
                          """Whether to run eval only once.""")
 tf.app.flags.DEFINE_boolean('predict_slice', True,
                          """Whether to predict a slice and save predictions""")
-tf.app.flags.DEFINE_integer('imgn', None,
-                            """Image number.""")
-tf.app.flags.DEFINE_integer('depthn', None,
-                            """Depth number.""")
+
 
 def eval_once(saver, summary_writer, ops, summary_op, nexamples=None):
   """Run Eval once.
@@ -119,11 +116,11 @@ def evaluate():
 
   if FLAGS.predict_slice:
     # load images, both channels
-    images_and_labels = np.load('../data/datasets/images_and_labels_bmesyn_regfix.npy')
-    pre_images = np.load('../data/datasets/pre_images_aligned_regfix.npy')
+    images_and_labels = np.load('../data/datasets/t2imgs_and_prereg_labels.npy')
+    #pre_images = np.load('../data/datasets/pre_images_aligned_regfix.npy')
 
     # make predset and save the binary
-    cluster_labels, hi_cluster = mp.predict_slice_kmeans(images_and_labels, pre_images, FLAGS.imgn, FLAGS.depthn,
+    cluster_labels, hi_cluster = mp.predict_slice_kmeans_t2only(images_and_labels, FLAGS.imgn, FLAGS.depthn,
                                   '../data/datasets/bins/img{0}d{1}_and_label_regfix_batch_1.bin'.format(FLAGS.imgn, FLAGS.depthn))
 
   """Eval model for a number of steps."""
@@ -172,7 +169,7 @@ def evaluate():
         for k in range(len(i)):
           mask[i[k], j[k]] = preds[k]
 
-        np.save('../preds/img{0}d{1}_regfix_preds'.format(FLAGS.imgn, FLAGS.depthn), mask)
+        np.save('../preds/img{0}d{1}_t2bmeonly_preds'.format(FLAGS.imgn, FLAGS.depthn), mask)
 
       else:
         eval_once(saver, summary_writer, [top_k_op, top_k_op_vals], summary_op)

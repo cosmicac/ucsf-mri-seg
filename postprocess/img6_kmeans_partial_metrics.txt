@@ -1,0 +1,374 @@
+Raw Metrics Depth 0:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9986419677734375
+	dsc : 0.0
+	acc : 0.9986419677734375
+ 
+Post-processed Metrics Depth 0:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9994087219238281
+	dsc : 0.0
+	acc : 0.9994087219238281
+
+
+Raw Metrics Depth 1:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9969482421875
+	dsc : 0.0
+	acc : 0.9969482421875
+ 
+Post-processed Metrics Depth 1:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9998588562011719
+	dsc : 0.0
+	acc : 0.9998588562011719
+
+
+Raw Metrics Depth 2:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9840736389160156
+	dsc : 0.0
+	acc : 0.9840736389160156
+ 
+Post-processed Metrics Depth 2:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9933395385742188
+	dsc : 0.0
+	acc : 0.9933395385742188
+
+
+Raw Metrics Depth 3:
+	ppv : 0.12818432581534966
+	sens : 0.7227813357731016
+	npv : 0.9988163183986312
+	spec : 0.9794178149097302
+	dsc : 0.2177508269018743
+	acc : 0.9783477783203125
+ 
+Post-processed Metrics Depth 3:
+	ppv : 0.22009864364981505
+	sens : 0.6532479414455626
+	npv : 0.9985361143298571
+	spec : 0.9903084071694803
+	dsc : 0.32925985704403965
+	acc : 0.9889030456542969
+
+
+Raw Metrics Depth 4:
+	ppv : 0.14030375038743673
+	sens : 0.7694050991501417
+	npv : 0.9983878953518309
+	spec : 0.9680427377015811
+	dsc : 0.23732960503320516
+	acc : 0.966705322265625
+ 
+Post-processed Metrics Depth 4:
+	ppv : 0.21276937922161468
+	sens : 0.7495750708215297
+	npv : 0.998272938271219
+	spec : 0.9812004808375483
+	dsc : 0.3314543404735062
+	acc : 0.9796409606933594
+
+
+Raw Metrics Depth 5:
+	ppv : 0.28548695098663274
+	sens : 0.8551000953288846
+	npv : 0.998195617249266
+	spec : 0.973995837789627
+	dsc : 0.4280601288475304
+	acc : 0.9725685119628906
+ 
+Post-processed Metrics Depth 5:
+	ppv : 0.38887249114521844
+	sens : 0.8373053701938354
+	npv : 0.9979950502803797
+	spec : 0.9840113978154187
+	dsc : 0.5310893882898317
+	acc : 0.9822502136230469
+
+
+Raw Metrics Depth 6:
+	ppv : 0.22118098679010953
+	sens : 0.9031811894882434
+	npv : 0.9991709009937344
+	spec : 0.9734666794884124
+	dsc : 0.3553419191003084
+	acc : 0.9728851318359375
+ 
+Post-processed Metrics Depth 6:
+	ppv : 0.3206791606599391
+	sens : 0.9230059935454127
+	npv : 0.9993474038788438
+	spec : 0.983686892970478
+	dsc : 0.47598668568711366
+	acc : 0.983184814453125
+
+
+Raw Metrics Depth 7:
+	ppv : 0.1559810032650638
+	sens : 0.7469793887704336
+	npv : 0.9986061408111008
+	spec : 0.978188749582913
+	dsc : 0.25807243707796196
+	acc : 0.9769477844238281
+ 
+Post-processed Metrics Depth 7:
+	ppv : 0.2751163427320011
+	sens : 0.7142857142857143
+	npv : 0.998444820129134
+	spec : 0.9898441724803154
+	dsc : 0.39723320158102765
+	acc : 0.9883651733398438
+
+
+Raw Metrics Depth 8:
+	ppv : 0.1631504922644163
+	sens : 0.7214927436074637
+	npv : 0.9984242116170404
+	spec : 0.9794589120703345
+	dsc : 0.26612286515421874
+	acc : 0.9780349731445312
+ 
+Post-processed Metrics Depth 8:
+	ppv : 0.31743421052631576
+	sens : 0.6668970283344852
+	npv : 0.9981397431147339
+	spec : 0.9920405681691773
+	dsc : 0.43013149097392467
+	acc : 0.9902458190917969
+
+
+Raw Metrics Depth 9:
+	ppv : 0.14918341708542712
+	sens : 0.7364341085271318
+	npv : 0.9986707118728888
+	spec : 0.9792297607090557
+	dsc : 0.24810655523635414
+	acc : 0.9780349731445312
+ 
+Post-processed Metrics Depth 9:
+	ppv : 0.2574684323991377
+	sens : 0.648062015503876
+	npv : 0.9982464068722311
+	spec : 0.9907572818511504
+	dsc : 0.36852545735067227
+	acc : 0.9890708923339844
+
+
+Raw Metrics Depth 10:
+	ppv : 0.22874648966045444
+	sens : 0.8123300090661831
+	npv : 0.9983720655892415
+	spec : 0.9767559956605036
+	dsc : 0.3569721115537849
+	acc : 0.975372314453125
+ 
+Post-processed Metrics Depth 10:
+	ppv : 0.3612121212121212
+	sens : 0.8105167724388033
+	npv : 0.9983747676850937
+	spec : 0.9878355607875724
+	dsc : 0.49972051425377306
+	acc : 0.9863433837890625
+
+
+Raw Metrics Depth 11:
+	ppv : 0.25152774382791493
+	sens : 0.7233743409490334
+	npv : 0.996901111189863
+	spec : 0.9763824773716829
+	dsc : 0.37326562074907044
+	acc : 0.9736366271972656
+ 
+Post-processed Metrics Depth 11:
+	ppv : 0.3353669165068851
+	sens : 0.6762741652021089
+	npv : 0.9964080543822906
+	spec : 0.9852949683569933
+	dsc : 0.44838033092519225
+	acc : 0.9819412231445312
+
+
+Raw Metrics Depth 12:
+	ppv : 0.33411532287936785
+	sens : 0.8252516010978957
+	npv : 0.9977444940856934
+	spec : 0.9791667471461959
+	dsc : 0.4756547723677272
+	acc : 0.9772415161132812
+ 
+Post-processed Metrics Depth 12:
+	ppv : 0.46539462272333043
+	sens : 0.8182372674595914
+	npv : 0.9976753166210961
+	spec : 0.9880941803642825
+	dsc : 0.5933215391419726
+	acc : 0.9859695434570312
+
+
+Raw Metrics Depth 13:
+	ppv : 0.14334587752309272
+	sens : 0.499404052443385
+	npv : 0.9983797608990013
+	spec : 0.9904173284093301
+	dsc : 0.2227538543328017
+	acc : 0.9888458251953125
+ 
+Post-processed Metrics Depth 13:
+	ppv : 0.3674418604651163
+	sens : 0.18831942789034564
+	npv : 0.9973979229234966
+	spec : 0.9989590708176269
+	dsc : 0.24901497241922774
+	acc : 0.9963645935058594
+
+
+Raw Metrics Depth 14:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9905242919921875
+	dsc : 0.0
+	acc : 0.9905242919921875
+ 
+Post-processed Metrics Depth 14:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9973983764648438
+	dsc : 0.0
+	acc : 0.9973983764648438
+
+
+Raw Metrics Depth 15:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9932785034179688
+	dsc : 0.0
+	acc : 0.9932785034179688
+ 
+Post-processed Metrics Depth 15:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9981231689453125
+	dsc : 0.0
+	acc : 0.9981231689453125
+
+
+Raw Metrics Depth 16:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9931869506835938
+	dsc : 0.0
+	acc : 0.9931869506835938
+ 
+Post-processed Metrics Depth 16:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9978866577148438
+	dsc : 0.0
+	acc : 0.9978866577148438
+
+
+Raw Metrics Depth 17:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9984512329101562
+	dsc : 0.0
+	acc : 0.9984512329101562
+ 
+Post-processed Metrics Depth 17:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.99969482421875
+	dsc : 0.0
+	acc : 0.99969482421875
+
+
+Raw Metrics Depth 18:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9984397888183594
+	dsc : 0.0
+	acc : 0.9984397888183594
+ 
+Post-processed Metrics Depth 18:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9995346069335938
+	dsc : 0.0
+	acc : 0.9995346069335938
+
+
+Raw Metrics Depth 19:
+	ppv : 0.0
+	sens : nan
+	npv : 1.0
+	spec : 0.9999732971191406
+	dsc : 0.0
+	acc : 0.9999732971191406
+ 
+Post-processed Metrics Depth 19:
+	ppv : nan
+	sens : nan
+	npv : 1.0
+	spec : 1.0
+	dsc : nan
+	acc : 1.0
+
+
+Averages
+
+
+	Raw ppv: 0.11006031802426328
+	Raw sens: 0.7559758149274451
+	Raw npv: 0.9990834614029145
+	Raw spec: 0.9854020477328863
+	Raw dsc: 0.17197153481774188
+	Raw acc: 0.98460693359375
+
+
+	Post-processed ppv: 0.1853607463811313
+	Post-processed sens: 0.6987024333746604
+	Post-processed npv: 0.9989419269244187
+	Post-processed spec: 0.9928638866298304
+	Post-processed dsc: 0.24495356727054113
+	Post-processed acc: 0.991876220703125
+Middle Averages
+
+
+	Raw ppv: 0.18845654860635602
+	Raw sens: 0.7592952628428796
+	Raw npv: 0.9984411736054237
+	Raw spec: 0.9786935925383478
+	Raw dsc: 0.29287998813208754
+	Raw acc: 0.9773452065207742
+
+
+	Post-processed ppv: 0.30015959432651634
+	Post-processed sens: 0.7032478825675701
+	Post-processed npv: 0.9982093112871382
+	Post-processed spec: 0.989011177355946
+	Post-processed dsc: 0.39316890191784015
+	Post-processed acc: 0.9873431812633168

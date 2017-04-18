@@ -50,6 +50,30 @@ def imgslice_to_patch_arr_kmeans(imgc1, imgc2, depth, cluster_labels, cluster_wa
 
 	print(len(patch_arr))
 
+	return np.array(patch_arr)
+
+def imgslice_to_patch_arr_kmeans_c1(imgc1, depth, cluster_labels, cluster_wanted):
+	
+	h, w, d = imgc1.shape
+	patch_arr = []
+	count = 0
+
+	for i in range(h):
+		for j in range(w):
+
+			if count % 25000 == 0:
+				print("Extracting patch {0}.".format(count)) 
+
+			if (cluster_labels[i,j] == cluster_wanted):
+				patch_ij= make_datasets.extract_patch(imgc1, center=(i,j,depth)).reshape((32,32,8,1))
+
+				# concatenate the patches
+				patch_arr.append(patch_ij)
+
+			count += 1
+
+	print(len(patch_arr))
+
 	return np.array(patch_arr) 
 
 def predict_slice(images_and_labels, pre_images, img_number, depth, save_path):
@@ -71,6 +95,21 @@ def predict_slice_kmeans(images_and_labels, pre_images, img_number, depth, save_
 
 	img_labels = img_labels[cluster_labels == hi_cluster].astype('uint16')
 	img = imgslice_to_patch_arr_kmeans(c1, c2, depth, cluster_labels, hi_cluster).astype('uint16')
+	npy_to_bin.flatten_and_bin(img, img_labels, save_path)
+
+	return cluster_labels, hi_cluster
+
+def predict_slice_kmeans_t2only(images_and_labels, img_number, depth, save_path):
+	c1 = images_and_labels[img_number, 0, :, :, :]
+	img_labels = images_and_labels[img_number, 1, :, :, depth].astype('uint16')
+
+	depth_slice = c1[:,:,depth]
+	km = KMeans(n_clusters=2).fit(depth_slice.reshape((512*512,1)))
+	cluster_labels = km.labels_.reshape((512,512))
+	hi_cluster = np.argmax(km.cluster_centers_)
+
+	img_labels = img_labels[cluster_labels == hi_cluster].astype('uint16')
+	img = imgslice_to_patch_arr_kmeans_c1(c1, depth, cluster_labels, hi_cluster).astype('uint16')
 	npy_to_bin.flatten_and_bin(img, img_labels, save_path)
 
 	return cluster_labels, hi_cluster

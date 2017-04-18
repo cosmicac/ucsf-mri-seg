@@ -2,8 +2,8 @@ import numpy as np
 import scipy.io as sio
 import os.path
 import time
-#import util.npy_to_bin as npy_to_bin
-import npy_to_bin
+import util.npy_to_bin as npy_to_bin
+#import npy_to_bin
 from sklearn.cluster import KMeans
 
 NUM_SAMPLE_TRAIN = 345000
