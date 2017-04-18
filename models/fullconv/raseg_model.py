@@ -43,6 +43,32 @@ def variable_with_weight_decay(name, shape, stddev, wd):
 		tf.add_to_collection('losses', weight_decay)
 	return var
 
+def dice_coeff_loss(logits, labels): 
+
+    # softmax to get probabilities
+    softmax = tf.nn.softmax(logits, name='softmax')
+
+    # argmax to get predictions from largest probability
+    preds = tf.nn.argmax(softmax, axis=4, name='preds')
+
+    # calculate intersection and both sums for every patch
+    intersection = tf.reduce_sum(tf.multiply(preds, labels), axis=[1,2,3])
+    preds_sum = tf.reduce_sum(preds, axis=[1,2,3])
+    labels_sum = tf.reduce_sum(labels, axis=[1,2,3])
+
+    # dice coeffs for every patch
+    dice_coeff = tf.truediv(tf.multiply(intersection, 2), tf.add(preds_sum, labels_sum), name='dice_coeff_per_sample')
+
+    # average dice coefficient for batch
+    dice_coeff_mean = tf.reduce_mean(dice_coeff, name='dice_coeff')
+
+    # loss is just negative dice coefficient
+    dice_coeff_mean_loss = tf.negative(dice_coeff_mean, name='dice_coeff_loss')
+    tf.add_to_collection('losses', dice_coeff_mean_loss)
+    
+    # add l2 loss and dice coefficient loss for total loss
+    return tf.add_n(tf.get_collection('losses'), name='total_loss')
+
 def loss(logits, labels):
 
 	# labels must be ints
@@ -95,17 +121,6 @@ def inputs(eval_data):
     images = tf.cast(images, tf.float16)
     labels = tf.cast(labels, tf.float16)
   return images, labels
-
-def inference(patch):
-    
-    # l0 Conv1
-    with tf.variable_scope('l0_conv1') as scope:
-	kernel = variable_with_weight_decay('weights', shape=[5, 5, 5, NCHANNELS, 32], stddev=5e-2, wd=0.00)
-	conv = tf.nn.conv3d(voxel_regions, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
-	biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
-	sums = tf.nn.bias_add(conv, biases)
-	conv1 = tf.nn.relu(sums, name=scope.name)
-
 
 def inference(voxel_regions):
 
@@ -228,7 +243,7 @@ def inference(voxel_regions):
         kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 128, 64], stddev=5e-2, wd=0.00)
         output_shape = tf.constant([flags.BATCH_SIZE, 64, 64, 8, 64])
     	conv = tf.nn.conv3d_transpose(h2_conv4, kernel, output_shape, strides=[1, 2, 2, 2, 1], padding='SAME')
-    	biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
+    	biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
     	sums = tf.nn.bias_add(conv, biases)
     	up2 = tf.nn.relu(sums, name=scope.name)
         up2_concat = tf.concat([h1_conv2, up2], 4)
@@ -275,15 +290,15 @@ def inference(voxel_regions):
     	sums = tf.nn.bias_add(conv, biases)
         h0_conv4 = tf.nn.relu(sums, name=scope.name)
 
-    # output, sums before softmax
-    with tf.variable_scope('softmax_linear') as scope:
+    # output, logits
+    with tf.variable_scope('logits') as scope:
         kernel = variable_with_weight_decay('weights', shape=[1, 1, 1, 32, 2], stddev=5e-2, wd=0.00)
         conv = tf.nn.conv3d(h0_conv4, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
     	biases = variable_on_cpu('biases', [2], tf.constant_initializer(0.0))
     	sums = tf.nn.bias_add(conv, biases)
-        softmax_linear = tf.nn.relu(sums, name=scope.name)
+        logits = tf.nn.relu(sums, name=scope.name)
   
-    return softmax_linear
+    return logits 
 
 def train(total_loss, global_step):
 	num_batches_per_epoch = NUM_EXAMPLES_EPOCH_TRAIN / FLAGS.batch_size

@@ -29,7 +29,7 @@ def train():
     logits = raseg_model.inference(images)
 
     # Calculate loss.
-    loss = raseg_model.loss(logits, labels)
+    loss = raseg_model.dice_coeff_loss(logits, labels)
 
     # Build a Graph that trains the model with one batch of examples and
     # updates the model parameters.
