@@ -10,7 +10,7 @@ PATCH_DEPTH = 16
 NCHANNELS = 2
 
 NUM_CLASSES = 2
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 398363
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 2400
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 262144
 
 def read_train_bin(filename_queue):
@@ -104,7 +104,7 @@ def _generate_image_and_label_batch(image, label, min_queue_examples,
   # Display the training images in the visualizer.
   tf.summary.image('images', tf.reshape(images[:,:,:,5,0], (batch_size, PATCH_HEIGHT, PATCH_WIDTH, 1)))
 
-  return images, tf.reshape(label_batch, [batch_size])
+  return images, tf.reshape(label_batch, [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH])
 
 def inputs(eval_data, data_dir, batch_size, imgn=None, depthn=None):
   """Construct input for network evaluation using the Reader ops.
@@ -119,7 +119,7 @@ def inputs(eval_data, data_dir, batch_size, imgn=None, depthn=None):
     labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.
   """
   if not eval_data:
-    filenames = [os.path.join(data_dir, 'train_and_label_t2bmeonly_batch_{0}.bin'.format(i))
+    filenames = [os.path.join(data_dir, 'train_and_label_fullconv_batch_{0}.bin'.format(i))
                  for i in xrange(1, 5)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
   else:
@@ -152,6 +152,10 @@ def inputs(eval_data, data_dir, batch_size, imgn=None, depthn=None):
   # Subtract off the mean and divide by the adjusted std. of the pixels.
   float_image = tf.divide(tf.subtract(image, mean), adjusted_stddev) 
 
+  # Set the shapes of tensors.
+  float_image.set_shape([PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH, NCHANNELS])
+  read_input.label.set_shape([PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH])
+
   # Ensure that the random shuffling has good mixing properties.
   min_fraction_of_examples_in_queue = 0.4
   min_queue_examples = int(num_examples_per_epoch *
@@ -162,10 +166,7 @@ def inputs(eval_data, data_dir, batch_size, imgn=None, depthn=None):
                                          min_queue_examples, batch_size,
                                          shuffle=False)
   
-def distort_image(image_and_labels):
-
-    image = image_and_labels[0]
-    labels = image_and_labels[1]
+def distort_image(image, labels):
 
     # Generate an affine transformation.
     scale = 2.5
@@ -180,11 +181,13 @@ def distort_image(image_and_labels):
         if flip:
             image[:,:,i,0] = cv2.flip(cv2.warpAffine(image[:,:,i,0], M, (PATCH_WIDTH, PATCH_HEIGHT)), 1)
             image[:,:,i,1] = cv2.flip(cv2.warpAffine(image[:,:,i,1], M, (PATCH_WIDTH, PATCH_HEIGHT)), 1)
-            labels[:,:,i] = cv2.flip(cv2.warpAffine(labels[:,:,i], M, (PATCH_WIDTH, PATCH_HEIGHT)), 1) 
+            labels_warped = cv2.flip(cv2.warpAffine(np.float32(labels[:,:,i]), M, (PATCH_WIDTH, PATCH_HEIGHT)), 1) 
+            labels[:,:,i] = np.int32(labels_warped)
         else:   
             image[:,:,i,0] = cv2.warpAffine(image[:,:,i,0], M, (PATCH_WIDTH, PATCH_HEIGHT))
             image[:,:,i,1] = cv2.warpAffine(image[:,:,i,1], M, (PATCH_WIDTH, PATCH_HEIGHT))
-            labels[:,:,i] = cv2.warpAffine(labels[:,:,i], M, (PATCH_WIDTH, PATCH_HEIGHT)) 
+            labels_warped = cv2.warpAffine(np.float32(labels[:,:,i]), M, (PATCH_WIDTH, PATCH_HEIGHT)) 
+            labels[:,:,i] = np.int32(labels_warped) 
 
     return [image, labels]
 
@@ -197,7 +200,7 @@ def distorted_inputs(data_dir, batch_size):
     images: Images. 5D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH, NCHANNELS] size.
     labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.
   """
-  filenames = [os.path.join(data_dir, 'train_and_label_t2bmeonly_batch_{0}.bin'.format(i))
+  filenames = [os.path.join(data_dir, 'train_and_label_fullconv_batch_{0}.bin'.format(i))
                  for i in xrange(1, 5)]
 
   for f in filenames:
@@ -224,6 +227,10 @@ def distorted_inputs(data_dir, batch_size):
 
   # Subtract off the mean and divide by the adjusted std. of the pixels.
   float_image = tf.divide(tf.subtract(image, mean), adjusted_stddev) 
+
+  # Set the shapes of tensors.
+  float_image.set_shape([PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH, NCHANNELS])
+  label.set_shape([PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH])
 
   # Ensure that the random shuffling has good mixing properties.
   min_fraction_of_examples_in_queue = 0.4

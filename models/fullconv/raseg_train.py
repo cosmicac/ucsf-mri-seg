@@ -1,12 +1,11 @@
 from datetime import datetime
 import time
 import tensorflow as tf
-
 import raseg_model
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('train_dir', '../models/raseg_train_t2bmeonly',
+tf.app.flags.DEFINE_string('train_dir', '../../../models/raseg_train_t2bmeonly',
                            """Directory where to write event logs """
                            """and checkpoint.""")
 tf.app.flags.DEFINE_integer('max_steps', 1000000,
