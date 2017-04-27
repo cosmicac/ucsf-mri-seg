@@ -22,7 +22,7 @@ def train():
     global_step = tf.contrib.framework.get_or_create_global_step()
 
     # Get images and labels
-    images, labels = raseg_model.inputs(False)
+    images, labels = raseg_model.distorted_inputs()
 
     # Build a Graph that computes the logits predictions from the
     # inference model.

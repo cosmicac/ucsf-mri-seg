@@ -93,19 +93,38 @@ def add_loss_summaries(total_loss):
 		tf.summary.scalar(l.op.name + ' (raw)', l)
 		tf.summary.scalar(l.op.name, loss_averages.average(l))
 
-	return loss_averages_op
-
+	return loss_averages_op 
 def activation_summary(x):
 	tf.summary.histogram(x.op.name + '/activations', x)
 	tf.summary.scalar(tensor_name + 'sparsity', tf.nn.zero_fraction(x))
+
+def distorted_inputs():
+  """Construct input for evaluation using the Reader ops.
+  Args:
+    eval_data: bool, indicating if one should use the train or eval data set.
+  Returns:
+    images: Images. 5D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH, NCHANNELS] size.
+    labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.
+  Raises:
+    ValueError: If no data_dir
+  """
+
+  if not FLAGS.data_dir:
+    raise ValueError('Please supply a data_dir')
+  images, labels = raseg_input.distorted_inputs(data_dir=FLAGS.data_dir, batch_size=FLAGS.batch_size)
+
+  if FLAGS.use_fp16:
+    images = tf.cast(images, tf.float16)
+    labels = tf.cast(labels, tf.float16)
+  return images, labels
 
 def inputs(eval_data):
   """Construct input for evaluation using the Reader ops.
   Args:
     eval_data: bool, indicating if one should use the train or eval data set.
   Returns:
-    images: Images. 5D tensor of [batch_size, PATCH_HEIGHT, PATCH_DEPTH, NCHANNELS, 3] size.
-    labels: Labels. 1D tensor of [batch_size] size.
+    images: Images. 5D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH, NCHANNELS] size.
+    labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.
   Raises:
     ValueError: If no data_dir
   """
