@@ -20,7 +20,7 @@ NUM_EXAMPLES_EPOCH_EVAL = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 MOVING_AVERAGE_DECAY = 0.9999
 NUM_EPOCHS_PER_DECAY = 20
 LEARNING_RATE_DECAY_FACTOR = 0.1
-INITIAL_LEARNING_RATE = 0.1
+INITIAL_LEARNING_RATE = 0.01
 
 
 def variable_on_cpu(name, shape, initializer):
@@ -45,8 +45,11 @@ def variable_with_weight_decay(name, shape, stddev, wd):
 
 def dice_coeff_loss(logits, labels): 
 
+    print("Logits shape: {0}".format(logits.get_shape()))
+    print("Labels shape: {0}".format(labels.get_shape()))
+    
     # softmax to get probabilities
-    softmax = tf.nn.softmax(logits, name='softmax')
+    softmax = tf.nn.softmax(logits, dim=-1, name='softmax')
 
     # argmax to get predictions from largest probability
     preds = tf.to_int32(tf.argmax(softmax, axis=4, name='preds'))
@@ -56,8 +59,14 @@ def dice_coeff_loss(logits, labels):
     preds_sum = tf.reduce_sum(preds, axis=[1,2,3])
     labels_sum = tf.reduce_sum(labels, axis=[1,2,3])
 
+    # smoothing factor
+    smoothing = tf.constant(1.0, dtype=tf.float32)
+
     # dice coeffs for every patch
-    dice_coeff = tf.truediv(tf.multiply(intersection, 2), tf.add(preds_sum, labels_sum), name='dice_coeff_per_sample')
+    dice_coeff = tf.to_float(tf.truediv(tf.add(tf.to_float(tf.multiply(intersection, 2)), smoothing), 
+                            tf.add(tf.to_float(tf.add(preds_sum, labels_sum)), smoothing), name='dice_coeff_per_sample'))
+
+    #print("Dice coeff shape: {0}".format(dice_coeff.get_shape()))
 
     # average dice coefficient for batch
     dice_coeff_mean = tf.reduce_mean(dice_coeff, name='dice_coeff')
@@ -335,7 +344,7 @@ def train(total_loss, global_step):
     
     # compute gradients
     with tf.control_dependencies([loss_averages_op]):
-    	opt = tf.train.GradientDescentOptimizer(lr)
+    	opt = tf.train.AdamOptimizer(learning_rate=lr)
     	grads = opt.compute_gradients(total_loss)
     
     # apply gradients
