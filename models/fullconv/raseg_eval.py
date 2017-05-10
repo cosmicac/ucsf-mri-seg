@@ -9,11 +9,11 @@ import util.make_predsets as mp
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('eval_dir', '../models/raseg_eval',
+tf.app.flags.DEFINE_string('eval_dir', '../../../models/raseg_eval',
                            """Directory where to write event logs.""")
 tf.app.flags.DEFINE_string('eval_data', 'test',
                            """Either 'train_eval' or 'test'.""")
-tf.app.flags.DEFINE_string('checkpoint_dir', '../models/raseg_train_t2bmeonly',
+tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_t2bmeonly',
                            """Directory where to read model checkpoints.""")
 tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 5,
                             """How often to run the eval.""")
@@ -119,17 +119,12 @@ def evaluate():
     images_and_labels = np.load('../data/datasets/t2imgs_and_prereg_labels.npy')
     #pre_images = np.load('../data/datasets/pre_images_aligned_regfix.npy')
 
-    # make predset and save the binary
-    cluster_labels, hi_cluster = mp.predict_slice_kmeans_t2only(images_and_labels, FLAGS.imgn, FLAGS.depthn,
-                                  '../data/datasets/bins/img{0}d{1}_and_label_regfix_batch_1.bin'.format(FLAGS.imgn, FLAGS.depthn))
-
   """Eval model for a number of steps."""
   with tf.Graph().as_default() as g:
     # Get images and labels
     eval_data = FLAGS.eval_data == 'test'
 
     print(FLAGS.imgn)
-    print(FLAGS.depthn)
     images, labels = raseg_model.inputs(eval_data=eval_data)
 
     # Build a Graph that computes the logits predictions from the
