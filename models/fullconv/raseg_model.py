@@ -60,7 +60,7 @@ def dice_coeff_loss(logits, labels):
     print("Softmax shape: {0}".format(softmax.get_shape()))
 
     # probabilites for non-healthy
-    softmax_non_healthy = tf.reshape(tf.slice(softmax, begin=[0,0,0,0,0], size=[-1,-1,-1,-1,1]), [FLAGS.batch_size,128,128,16])
+    softmax_non_healthy = tf.reshape(tf.slice(softmax, begin=[0,0,0,0,1], size=[-1,-1,-1,-1,1]), [FLAGS.batch_size,128,128,16])
     print("Softmax_non_healthy shape: {0}".format(softmax_non_healthy.get_shape()))
 
     # calculate intersection and both sums for every patch
@@ -74,11 +74,17 @@ def dice_coeff_loss(logits, labels):
     print("Labels sum shape: {0}".format(labels_sum.get_shape()))
 
     # smoothing factor
-    smoothing = tf.constant(1.0, dtype=tf.float32)
+    #smoothing = tf.constant(1.0, dtype=tf.float32)
+    
+    # numerical stability
+    stability = tf.constant(0.00001, dtype=tf.float32)
 
     # dice coeffs for every patch
-    dice_coeff = tf.to_float(tf.truediv(tf.add(tf.multiply(intersection, 2), smoothing), 
-                            tf.add(tf.add(preds_sum, labels_sum), smoothing), name='dice_coeff_per_sample'))
+    numerator = tf.multiply(intersection, 2)
+    denominator = tf.add(tf.add(preds_sum, labels_sum), stability)
+    dice_coeff = tf.truediv(numerator, denominator, name='dice_coeff_per_sample')
+    #dice_coeff = tf.to_float(tf.truediv(tf.add(tf.multiply(intersection, 2), smoothing), 
+    #                        tf.add(tf.add(preds_sum, labels_sum), smoothing), name='dice_coeff_per_sample'))
     print("Dice coeff shape: {0}".format(dice_coeff.get_shape()))
 
     # average dice coefficient for batch

@@ -13,7 +13,8 @@ tf.app.flags.DEFINE_string('eval_dir', '../../../models/raseg_predict',
                            """Directory where to write event logs.""")
 tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_fullconv_3',
                            """Directory where to read model checkpoints.""")
-tf.app.flags.DEFINE_integer('imgn', 0, """Image number to evaluate.""")
+tf.app.flags.DEFINE_integer('imgn', 8, """Image number to evaluate.""")
+tf.app.flags.DEFINE_string('savetag', 'fullconv_3_s1848', """Tag to save predictions as. """)
 
 def predict():
 
@@ -88,7 +89,7 @@ def predict():
         c += 1
 
   # Save the mask.
-  np.save('../../../preds/fullconv_3/img{0}_fullconv_3'.format(FLAGS.imgn), final_mask)
+  np.save('../../../preds/{0}/img{1}_{2}'.format(FLAGS.savetag, FLAGS.imgn, FLAGS.savetag), final_mask)
 
   return final_mask
 
