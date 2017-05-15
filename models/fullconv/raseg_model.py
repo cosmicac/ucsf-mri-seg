@@ -9,8 +9,6 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_boolean('use_fp16', False, """Train model using 16-bit floating point.""")
 tf.app.flags.DEFINE_string('data_dir', '../../../data/datasets/bins', """Directory to the data binaries""")
 tf.app.flags.DEFINE_integer('batch_size', 8, """Number of voxel regions in our batch.""")
-tf.app.flags.DEFINE_integer('imgn', 3, """Image number.""")
-tf.app.flags.DEFINE_integer('depthn', 11, """Depth number.""")
 
 # constants
 NCHANNELS = raseg_input.NCHANNELS
@@ -160,9 +158,7 @@ def inputs(eval_data):
     raise ValueError('Please supply a data_dir')
   images, labels = raseg_input.inputs(eval_data=eval_data,
                                         data_dir=FLAGS.data_dir,
-                                        batch_size=FLAGS.batch_size,
-                                        imgn=FLAGS.imgn,
-                                        depthn=FLAGS.depthn)
+                                        batch_size=FLAGS.batch_size)
   if FLAGS.use_fp16:
     images = tf.cast(images, tf.float16)
     labels = tf.cast(labels, tf.float16)

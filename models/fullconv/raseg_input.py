@@ -106,15 +106,13 @@ def _generate_image_and_label_batch(image, label, min_queue_examples,
 
   return images, tf.reshape(label_batch, [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH])
 
-def inputs(eval_data, data_dir, batch_size, imgn=None, depthn=None):
+def inputs(eval_data, data_dir, batch_size):
   """Construct input for network evaluation using the Reader ops.
   Args:
     eval_data: bool, indicating if one should use the train or eval data set.
     data_dir: Path to the data directory.
     batch_size: Number of images per batch.
-    imgn: Image number for evaluation.
-    depthn: Depth number for evaluation.
-  Returns:
+ Returns:
     images: Images. 5D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH, NCHANNELS] size.
     labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.
   """
@@ -123,10 +121,6 @@ def inputs(eval_data, data_dir, batch_size, imgn=None, depthn=None):
                  for i in xrange(1, 5)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
   else:
-
-    # eval needs imgn and depthn
-    # assert imgn
-    # assert depthn
 
     filenames = [os.path.join(data_dir,
      'img{0}d{1}_and_label_regfix_batch_{2}.bin'.format(imgn, depthn, i))
