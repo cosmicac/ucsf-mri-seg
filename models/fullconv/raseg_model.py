@@ -268,7 +268,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         up1 = tf.nn.relu(sums, name=scope.name)
-        up1_concat = tf.concat(values=[h2_conv2, up1], concat_dim=4)
+        up1_concat = tf.concat_v2(values=[h2_conv2, up1], axis=4)
 
     # height 2, convolution 3
     with tf.variable_scope('h2_conv3') as scope:
@@ -294,7 +294,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         up2 = tf.nn.relu(sums, name=scope.name)
-        up2_concat = tf.concat(values=[h1_conv2, up2],concat_dim=4)
+        up2_concat = tf.concat_v2(values=[h1_conv2, up2], axis=4)
 
     # height 1, convolution 3
     with tf.variable_scope('h1_conv3') as scope:
@@ -320,7 +320,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         up3 = tf.nn.relu(sums, name=scope.name)
-        up3_concat = tf.concat(values=[h0_conv2, up3], concat_dim=4)
+        up3_concat = tf.concat_v2(values=[h0_conv2, up3], axis=4)
 
     # height 0, convolution 3
     with tf.variable_scope('h0_conv3') as scope:
