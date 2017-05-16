@@ -11,10 +11,23 @@ FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string('eval_dir', '../../../models/raseg_predict',
                            """Directory where to write event logs.""")
-tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_fullconv_3',
+tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_fullconv_4',
                            """Directory where to read model checkpoints.""")
-tf.app.flags.DEFINE_integer('imgn', 8, """Image number to evaluate.""")
-tf.app.flags.DEFINE_string('savetag', 'fullconv_3_s1848', """Tag to save predictions as. """)
+tf.app.flags.DEFINE_integer('imgn', 0, """Image number to evaluate.""")
+tf.app.flags.DEFINE_string('savetag', 'fullconv_4', """Tag to save predictions as. """)
+
+"""Assumes image is of dimensions [height, width, depth, nchannels]"""
+def normalize(image):
+  h, w, d = 128, 128, 16
+  mean = np.mean(image, axis=(0,1,2))
+  var = np.var(image, axis=(0,1,2))
+  adjusted_stddev = np.maximum(np.sqrt(var), np.divide(1.0,np.sqrt(h*w*d)))
+  normalized_images = np.divide(np.subtract(image, mean), adjusted_stddev)
+  #print('Variance shape: {0}'.format(var.shape))
+  #print('Mean shape: {0}'.format(mean.shape))
+  #print('Adjusted stddev shape: {0}'.format(adjusted_stddev.shape))
+  #print('Normalized images shape: {0}'.format(normalized_images.shape))
+  return normalized_images
 
 def predict():
 
@@ -40,6 +53,9 @@ def predict():
         patches[k,:,:,:,1] = md.extract_patch(pre_img, (h,w,d)).astype(np.float32)
         k += 1
 
+  # Normalize patches and make batches. 
+  for i in range(patches.shape[0]):
+    patches[i,:,:,:,:] = normalize(patches[i,:,:,:,:])
   batches = [patches[:8,:,:,:,:], patches[8:16,:,:,:,:], patches[16:24,:,:,:,:], patches[24:,:,:,:,:]]  
   preds = np.zeros((32,128,128,16))
 
@@ -75,7 +91,7 @@ def predict():
         preds_batch = sess.run(preds_op, feed_dict={images: b})
         preds[8*c:8*(c+1),:,:,:] = preds_batch
         c += 1
-
+                
   # Stitch together for the final mask. 
   final_mask = np.zeros((512,512,20))
   c = 0

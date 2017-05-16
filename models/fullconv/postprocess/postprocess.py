@@ -50,8 +50,8 @@ def save_true_and_mask(iml, i, mask, savetag):
 
         for d in range(20):
             print(d)
-            overlay_mask_and_save(img[:,:,d], img_labels[:,:,d], '../../../../pictures/img{0}d{1}_{2}_true'.format(i, d, savetag))
-            overlay_mask_and_save(img[:,:,d], mask[:,:,d], '../../../../pictures/img{0}d{1}_{2}_pred'.format(i, d, savetag))
+            overlay_mask_and_save(img[:,:,d], img_labels[:,:,d], '../../../../pictures/{0}/img{1}/img{2}d{3}_{4}_true'.format(savetag, i, i, d, savetag))
+            overlay_mask_and_save(img[:,:,d], mask[:,:,d], '../../../../pictures/{0}/img{1}/img{2}d{3}_{4}_pred'.format(savetag, i, i, d, savetag))
 
 
 def calc_metrics(true_labs, pred_labs):
@@ -179,12 +179,40 @@ def save_metrics_whole(iml, imgs, tag):
                 print("\t{0} : {1}".format(m, v), file=text_file)
 
 
+def test_dsc(pred_labs, labs):
+    intersection = np.sum(np.multiply(pred_labs, labs), axis=(1,2,3))
+    preds_sum = np.sum(pred_labs, axis=(1,2,3))
+    labels_sum = np.sum(labs, axis=(1,2,3))
+    stability = 0.00001
+    numerator = np.multiply(intersection, 2)
+    denominator = np.add(np.add(preds_sum, labels_sum), stability)
+    dice_coeff = np.true_divide(numerator, denominator)
+    dice_coeff_mean = np.mean(dice_coeff)
+    return dice_coeff_mean
+
+def dsc(pred_labs, labs):
+    intersection = np.sum(np.multiply(pred_labs, labs))
+    preds_sum = np.sum(pred_labs)
+    labels_sum = np.sum(labs)
+    stability = 0.00001
+    numerator = np.multiply(intersection, 2)
+    denominator = np.add(np.add(preds_sum, labels_sum), stability)
+    dice_coeff = np.true_divide(numerator, denominator)
+    return dice_coeff
+
 if __name__ == '__main__':
 
     # load all images and labels
     iml = np.load('../../../../data/datasets/images_and_labels.npy')
-    imgn = 8
-    tag = 'fullconv_3_s1848'
+    imgn = 7
+    tag = 'fullconv_4'
     mask = load_preds(imgn, tag)
     save_true_and_mask(iml, imgn, mask, tag)
+    print(dsc(mask, iml[imgn,1,:,:,:])) 
 
+    #labels = np.load('labs_test.npy').astype(np.float32)
+    #imgs = np.load('imgs_test.npy')
+    #test_preds = np.ones((24,128,128,16), dtype=np.float32)
+
+    #test_batch_labs = labels[550:574,:,:,:]
+    #print(test_dsc(test_preds, test_batch_labs))
