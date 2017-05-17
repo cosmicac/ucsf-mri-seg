@@ -260,21 +260,72 @@ def inference(voxel_regions):
         sums = tf.nn.bias_add(conv, biases)
         h3_conv2 = tf.nn.relu(sums, name=scope.name)
 
-    # upsampling from height 3 to height 2 and feed height 2 forward
+    # downsampling from height 3 to height 4
+    with tf.variable_scope('down4') as scope:
+        kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 256, 256], stddev=5e-2, wd=0.00)
+        conv = tf.nn.conv3d(h3_conv2, kernel, strides=[1, 2, 2, 2, 1], padding='SAME')
+        biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
+        sums = tf.nn.bias_add(conv, biases)
+        down4 = tf.nn.relu(sums, name=scope.name)
+
+    # height 4, convolution 1
+    with tf.variable_scope('h4_conv1') as scope:
+        kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 256, 512], stddev=5e-2, wd=0.00)
+        conv = tf.nn.conv3d(down4, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
+        biases = variable_on_cpu('biases', [512], tf.constant_initializer(0.0))
+        sums = tf.nn.bias_add(conv, biases)
+        h4_conv1 = tf.nn.relu(sums, name=scope.name)
+
+    # height 4, convolution 2
+    with tf.variable_scope('h4_conv2') as scope:
+        kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 512, 512], stddev=5e-2, wd=0.00)
+        conv = tf.nn.conv3d(h4_conv1, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
+        biases = variable_on_cpu('biases', [512], tf.constant_initializer(0.0))
+        sums = tf.nn.bias_add(conv, biases)
+        h4_conv2 = tf.nn.relu(sums, name=scope.name)
+
+    # upsampling from height 4 to height 3 and feed height 3 forward
     with tf.variable_scope('up1') as scope:
-        kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 128, 256], stddev=5e-2, wd=0.00)
-        output_shape = tf.constant([FLAGS.batch_size, 32, 32, 4, 128])
-        conv = tf.nn.conv3d_transpose(h3_conv2, kernel, output_shape, strides=[1, 2, 2, 2, 1], padding='SAME')
-        biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
+        kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 256, 512], stddev=5e-2, wd=0.00)
+        output_shape = tf.constant([FLAGS.batch_size, 64, 64, 3, 256])
+        conv = tf.nn.conv3d_transpose(h4_conv2, kernel, output_shape, strides=[1, 2, 2, 2, 1], padding='SAME')
+        biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         up1 = tf.nn.relu(sums, name=scope.name)
-        #up1_concat = tf.concat_v2(values=[h2_conv2, up1], axis=4)
-        up1_concat = tf.concat(values=[h2_conv2, up1], concat_dim=4)
+        #up1_concat = tf.concat_v2(values=[h3_conv2, up1], axis=4)
+        up1_concat = tf.concat(values=[h3_conv2, up1], concat_dim=4)
+
+    # height 3, convolution 3
+    with tf.variable_scope('h3_conv3') as scope:
+        kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 512, 256], stddev=5e-2, wd=0.00)
+        conv = tf.nn.conv3d(up1_concat, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
+        biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
+        sums = tf.nn.bias_add(conv, biases)
+        h3_conv3 = tf.nn.relu(sums, name=scope.name)
+
+    # height 3, convolution 4
+    with tf.variable_scope('h3_conv4') as scope:
+        kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 256, 256], stddev=5e-2, wd=0.00)
+        conv = tf.nn.conv3d(h3_conv3, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
+        biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
+        sums = tf.nn.bias_add(conv, biases)
+        h3_conv4 = tf.nn.relu(sums, name=scope.name)
+
+    # upsampling from height 3 to height 2 and feed height 2 forward
+    with tf.variable_scope('up2') as scope:
+        kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 128, 256], stddev=5e-2, wd=0.00)
+        output_shape = tf.constant([FLAGS.batch_size, 128, 128, 5, 128])
+        conv = tf.nn.conv3d_transpose(h3_conv4, kernel, output_shape, strides=[1, 2, 2, 2, 1], padding='SAME')
+        biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
+        sums = tf.nn.bias_add(conv, biases)
+        up2 = tf.nn.relu(sums, name=scope.name)
+        #up2_concat = tf.concat_v2(values=[h2_conv2, up2], axis=4)
+        up2_concat = tf.concat(values=[h2_conv2, up2], concat_dim=4)
 
     # height 2, convolution 3
     with tf.variable_scope('h2_conv3') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 256, 128], stddev=5e-2, wd=0.00)
-        conv = tf.nn.conv3d(up1_concat, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
+        conv = tf.nn.conv3d(up2_concat, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
         biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h2_conv3 = tf.nn.relu(sums, name=scope.name)
@@ -287,21 +338,21 @@ def inference(voxel_regions):
         sums = tf.nn.bias_add(conv, biases)
         h2_conv4 = tf.nn.relu(sums, name=scope.name)
 
-    # upsampling from height 2 to height 1 and feed height 1 forward
-    with tf.variable_scope('up2') as scope:
+    # upsampling from height 2 to height 2 and feed height 1 forward
+    with tf.variable_scope('up3') as scope:
         kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 64, 128], stddev=5e-2, wd=0.00)
-        output_shape = tf.constant([FLAGS.batch_size, 64, 64, 8, 64])
+        output_shape = tf.constant([FLAGS.batch_size, 256, 256, 10, 64])
         conv = tf.nn.conv3d_transpose(h2_conv4, kernel, output_shape, strides=[1, 2, 2, 2, 1], padding='SAME')
         biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
-        up2 = tf.nn.relu(sums, name=scope.name)
-        #up2_concat = tf.concat_v2(values=[h1_conv2, up2], axis=4)
-        up2_concat = tf.concat(values=[h1_conv2, up2], concat_dim=4)
+        up3 = tf.nn.relu(sums, name=scope.name)
+        #up3_concat = tf.concat_v2(values=[h1_conv2, up3], axis=4)
+        up3_concat = tf.concat(values=[h1_conv2, up3], concat_dim=4)
 
     # height 1, convolution 3
     with tf.variable_scope('h1_conv3') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 128, 64], stddev=5e-2, wd=0.00)
-        conv = tf.nn.conv3d(up2_concat, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
+        conv = tf.nn.conv3d(up3_concat, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
         biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h1_conv3 = tf.nn.relu(sums, name=scope.name)
@@ -315,27 +366,27 @@ def inference(voxel_regions):
         h1_conv4 = tf.nn.relu(sums, name=scope.name)
 
     # upsampling from height 1 to height 0 and feed height 0 forward
-    with tf.variable_scope('up3') as scope:
+    with tf.variable_scope('up4') as scope:
         kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 32, 64], stddev=5e-2, wd=0.00)
-        output_shape = tf.constant([FLAGS.batch_size, 128, 128, 16, 32])
+        output_shape = tf.constant([FLAGS.batch_size, 512, 512, 20, 32])
         conv = tf.nn.conv3d_transpose(h1_conv4, kernel, output_shape, strides=[1, 2, 2, 2, 1], padding='SAME')
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
-        up3 = tf.nn.relu(sums, name=scope.name)
-        #up3_concat = tf.concat_v2(values=[h0_conv2, up3], axis=4)
-        up3_concat = tf.concat(values=[h0_conv2, up3], concat_dim=4)
+        up4 = tf.nn.relu(sums, name=scope.name)
+        #up4_concat = tf.concat_v2(values=[h0_conv2, up4], axis=4)
+        up4_concat = tf.concat(values=[h0_conv2, up4], concat_dim=4)
 
     # height 0, convolution 3
     with tf.variable_scope('h0_conv3') as scope:
-        kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 64, 32], stddev=5e-2, wd=0.00)
-        conv = tf.nn.conv3d(up3_concat, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
+        kernel = variable_with_weight_decay('weights', shape=[5, 5, 5, 64, 32], stddev=5e-2, wd=0.00)
+        conv = tf.nn.conv3d(up4_concat, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h0_conv3 = tf.nn.relu(sums, name=scope.name)
 
     # height 0, convolution 4
     with tf.variable_scope('h0_conv4') as scope:
-        kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 32, 32], stddev=5e-2, wd=0.00)
+        kernel = variable_with_weight_decay('weights', shape=[5, 5, 5, 32, 32], stddev=5e-2, wd=0.00)
         conv = tf.nn.conv3d(h0_conv3, kernel, strides=[1, 1, 1, 1, 1], padding='SAME')
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
