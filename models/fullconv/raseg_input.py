@@ -4,13 +4,13 @@ from six.moves import xrange
 import tensorflow as tf
 import numpy as np
 
-PATCH_HEIGHT = 128
-PATCH_WIDTH = 128
-PATCH_DEPTH = 16
+PATCH_HEIGHT = 512
+PATCH_WIDTH = 512
+PATCH_DEPTH = 20
 NCHANNELS = 2
 
 NUM_CLASSES = 2
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 2400
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 24
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 262144
 
 def read_train_bin(filename_queue):
@@ -23,9 +23,9 @@ def read_train_bin(filename_queue):
     filename_queue: A queue of strings with the filenames to read from.
   Returns:
     An object representing a single example, with the following fields:
-      height: number of rows in the result (128)
-      width: number of columns in the result (128)
-      depth: the spatial depth of the result (16)
+      height: number of rows in the result (512)
+      width: number of columns in the result (512)
+      depth: the spatial depth of the result (20)
       channels: number of channels
       key: a scalar string Tensor describing the filename & record number
         for this example.
@@ -48,8 +48,8 @@ def read_train_bin(filename_queue):
   # fixed number of bytes for each.
   record_bytes = label_bytes + image_bytes
 
-  # should be 128*128*16*2*2 + 128*128*16*2
-  assert record_bytes == 1572864
+  # should be 512*512*20*2*2 + 512*512*20*2
+  assert record_bytes == 31457280
 
   # Read a record, getting filenames from the filename_queue.  No
   # header or footer in the format, so we leave header_bytes
@@ -165,8 +165,8 @@ def distort_image(image, labels):
     # Generate an affine transformation.
     scale = 1
     pts1 = np.float32([[PATCH_HEIGHT/2, PATCH_WIDTH/2], [PATCH_HEIGHT/2, PATCH_WIDTH/2 + 25], [PATCH_HEIGHT/2 - 25, PATCH_WIDTH/2]])
-    #pts2 = np.float32(pts1 + np.random.normal(0, scale, pts1.shape))
-    pts2 = pts1
+    pts2 = np.float32(pts1 + np.random.normal(0, scale, pts1.shape))
+    #pts2 = pts1
     M = cv2.getAffineTransform(pts1, pts2)
     flip = np.random.randint(2)
 
@@ -195,7 +195,7 @@ def distorted_inputs(data_dir, batch_size):
     images: Images. 5D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH, NCHANNELS] size.
     labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.
   """
-  filenames = [os.path.join(data_dir, 'train_and_label_fullconv_batch_{0}.bin'.format(i))
+  filenames = [os.path.join(data_dir, 'train_and_label_fullimg_batch_{0}.bin'.format(i))
                  for i in xrange(1, 5)]
 
   for f in filenames:

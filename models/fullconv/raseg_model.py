@@ -8,7 +8,7 @@ import raseg_input
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_boolean('use_fp16', False, """Train model using 16-bit floating point.""")
 tf.app.flags.DEFINE_string('data_dir', '../../../data/datasets/bins', """Directory to the data binaries""")
-tf.app.flags.DEFINE_integer('batch_size', 8, """Number of voxel regions in our batch.""")
+tf.app.flags.DEFINE_integer('batch_size', 1, """Number of voxel regions in our batch.""")
 
 # constants
 NCHANNELS = raseg_input.NCHANNELS
@@ -60,7 +60,7 @@ def dice_coeff_loss(logits, labels):
     print("Softmax shape: {0}".format(softmax.get_shape()))
 
     # probabilites for non-healthy
-    softmax_non_healthy = tf.reshape(tf.slice(softmax, begin=[0,0,0,0,1], size=[-1,-1,-1,-1,1]), [FLAGS.batch_size,128,128,16])
+    softmax_non_healthy = tf.reshape(tf.slice(softmax, begin=[0,0,0,0,1], size=[-1,-1,-1,-1,1]), [FLAGS.batch_size,raseg_input.PATCH_HEIGHT,raseg_input.PATCH_WIDTH,raseg_input.PATCH_DEPTH])
     print("Softmax_non_healthy shape: {0}".format(softmax_non_healthy.get_shape()))
 
     # calculate intersection and both sums for every patch
