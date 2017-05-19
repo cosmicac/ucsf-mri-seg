@@ -165,20 +165,14 @@ def distort_image(image, labels):
     # Generate an affine transformation.
     scale = 1
     pts1 = np.float32([[PATCH_HEIGHT/2, PATCH_WIDTH/2], [PATCH_HEIGHT/2, PATCH_WIDTH/2 + 25], [PATCH_HEIGHT/2 - 25, PATCH_WIDTH/2]])
-    #pts2 = np.float32(pts1 + np.random.normal(0, scale, pts1.shape))
-    pts2 = pts1
+    pts2 = np.float32(pts1 + np.random.normal(0, scale, pts1.shape))
+    #pts2 = pts1
     M = cv2.getAffineTransform(pts1, pts2)
-    flip = np.random.randint(2)
+    distort = np.random.randint(2)
 
-    # Loop through each depth and apply the affine transformation
-    for i in range(PATCH_DEPTH):
-
-        if flip:
-            image[:,:,i,0] = cv2.flip(cv2.warpAffine(image[:,:,i,0], M, (PATCH_WIDTH, PATCH_HEIGHT)), 1)
-            image[:,:,i,1] = cv2.flip(cv2.warpAffine(image[:,:,i,1], M, (PATCH_WIDTH, PATCH_HEIGHT)), 1)
-            labels_warped = cv2.flip(cv2.warpAffine(np.float32(labels[:,:,i]), M, (PATCH_WIDTH, PATCH_HEIGHT)), 1) 
-            labels[:,:,i] = np.int32(labels_warped)
-        else:   
+    if (distort):
+        # Loop through each depth and apply the affine transformation
+        for i in range(PATCH_DEPTH):
             image[:,:,i,0] = cv2.warpAffine(image[:,:,i,0], M, (PATCH_WIDTH, PATCH_HEIGHT))
             image[:,:,i,1] = cv2.warpAffine(image[:,:,i,1], M, (PATCH_WIDTH, PATCH_HEIGHT))
             labels_warped = cv2.warpAffine(np.float32(labels[:,:,i]), M, (PATCH_WIDTH, PATCH_HEIGHT)) 
