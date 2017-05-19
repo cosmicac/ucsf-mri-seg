@@ -49,7 +49,8 @@ def train():
       def after_run(self, run_context, run_values):
         duration = time.time() - self._start_time
         loss_value = run_values.results
-        if self._step % 10 == 0:
+        #if self._step % 10 == 0:
+        if self._step % 1 == 0:
           num_examples_per_step = FLAGS.batch_size
           examples_per_sec = num_examples_per_step / duration
           sec_per_batch = float(duration)

@@ -16,9 +16,9 @@ NUM_CLASSES = raseg_input.NUM_CLASSES
 NUM_EXAMPLES_EPOCH_TRAIN = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_EPOCH_EVAL = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 MOVING_AVERAGE_DECAY = 0.9999
-NUM_EPOCHS_PER_DECAY = 10
-LEARNING_RATE_DECAY_FACTOR = 0.5
-INITIAL_LEARNING_RATE = 0.001
+NUM_EPOCHS_PER_DECAY = 3
+LEARNING_RATE_DECAY_FACTOR = 0.15
+INITIAL_LEARNING_RATE = 0.0001
 
 
 def variable_on_cpu(name, shape, initializer):
@@ -65,12 +65,15 @@ def dice_coeff_loss(logits, labels):
 
     # calculate intersection and both sums for every patch
     intersection = tf.reduce_sum(tf.multiply(softmax_non_healthy, labels), axis=[1,2,3])
+    intersection = tf.Print(intersection, [intersection], message='Intersection: ')
     print("Intersection shape: {0}".format(intersection.get_shape()))
 
     preds_sum = tf.reduce_sum(softmax_non_healthy, axis=[1,2,3], name='preds_sum')
+    preds_sum = tf.Print(preds_sum, [preds_sum], message='Preds: ')
     print("Preds sum shape: {0}".format(preds_sum.get_shape()))
 
     labels_sum = tf.reduce_sum(labels, axis=[1,2,3], name='labels_sum')
+    labels_sum= tf.Print(labels_sum, [labels_sum], message ='Labels: ')
     print("Labels sum shape: {0}".format(labels_sum.get_shape()))
 
     # smoothing factor
@@ -81,7 +84,9 @@ def dice_coeff_loss(logits, labels):
 
     # dice coeffs for every patch
     numerator = tf.multiply(intersection, 2)
+    numerator = tf.Print(numerator, [numerator], message='Numerator: ')
     denominator = tf.add(tf.add(preds_sum, labels_sum), stability)
+    denominator = tf.Print(denominator, [denominator], message='Denominator: ')
     dice_coeff = tf.truediv(numerator, denominator, name='dice_coeff_per_sample')
     #dice_coeff = tf.to_float(tf.truediv(tf.add(tf.multiply(intersection, 2), smoothing), 
     #                        tf.add(tf.add(preds_sum, labels_sum), smoothing), name='dice_coeff_per_sample'))
@@ -292,8 +297,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         up1 = tf.nn.relu(sums, name=scope.name)
-        #up1_concat = tf.concat_v2(values=[h3_conv2, up1], axis=4)
-        up1_concat = tf.concat(values=[h3_conv2, up1], concat_dim=4)
+        up1_concat = tf.concat_v2(values=[h3_conv2, up1], axis=4)
+        #up1_concat = tf.concat(values=[h3_conv2, up1], concat_dim=4)
 
     # height 3, convolution 3
     with tf.variable_scope('h3_conv3') as scope:
@@ -319,8 +324,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         up2 = tf.nn.relu(sums, name=scope.name)
-        #up2_concat = tf.concat_v2(values=[h2_conv2, up2], axis=4)
-        up2_concat = tf.concat(values=[h2_conv2, up2], concat_dim=4)
+        up2_concat = tf.concat_v2(values=[h2_conv2, up2], axis=4)
+        #up2_concat = tf.concat(values=[h2_conv2, up2], concat_dim=4)
 
     # height 2, convolution 3
     with tf.variable_scope('h2_conv3') as scope:
@@ -346,8 +351,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         up3 = tf.nn.relu(sums, name=scope.name)
-        #up3_concat = tf.concat_v2(values=[h1_conv2, up3], axis=4)
-        up3_concat = tf.concat(values=[h1_conv2, up3], concat_dim=4)
+        up3_concat = tf.concat_v2(values=[h1_conv2, up3], axis=4)
+        #up3_concat = tf.concat(values=[h1_conv2, up3], concat_dim=4)
 
     # height 1, convolution 3
     with tf.variable_scope('h1_conv3') as scope:
@@ -373,8 +378,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         up4 = tf.nn.relu(sums, name=scope.name)
-        #up4_concat = tf.concat_v2(values=[h0_conv2, up4], axis=4)
-        up4_concat = tf.concat(values=[h0_conv2, up4], concat_dim=4)
+        up4_concat = tf.concat_v2(values=[h0_conv2, up4], axis=4)
+        #up4_concat = tf.concat(values=[h0_conv2, up4], concat_dim=4)
 
     # height 0, convolution 3
     with tf.variable_scope('h0_conv3') as scope:

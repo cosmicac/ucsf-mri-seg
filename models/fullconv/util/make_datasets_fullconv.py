@@ -522,8 +522,15 @@ def make_fc_fullimg_dataset():
     assert pre_images.shape[0] == images_and_labels.shape[0]
 
     c1, c2 = images_and_labels[:,0,:,:,:], pre_images
-    imgs = np.concatenate((c1[...,np.newaxis], c2[...,np.newaxis]), axis=4)
-    labels = images_and_labels[:,1,:,:,:]
+    print(c1.shape)
+    print(c2.shape)
+    imgs = np.concatenate((c1[...,np.newaxis], c2[...,np.newaxis]), axis=4).astype('uint16')
+    labels = images_and_labels[:,1,:,:,:].astype('uint16')
+
+    print(imgs.shape)
+    print(labels.shape)
+    print(imgs.dtype)
+    print(labels.dtype)
 
     imgs1 = imgs[:6,:,:,:,:]
     imgs2 = imgs[6:12,:,:,:,:]

@@ -165,8 +165,8 @@ def distort_image(image, labels):
     # Generate an affine transformation.
     scale = 1
     pts1 = np.float32([[PATCH_HEIGHT/2, PATCH_WIDTH/2], [PATCH_HEIGHT/2, PATCH_WIDTH/2 + 25], [PATCH_HEIGHT/2 - 25, PATCH_WIDTH/2]])
-    pts2 = np.float32(pts1 + np.random.normal(0, scale, pts1.shape))
-    #pts2 = pts1
+    #pts2 = np.float32(pts1 + np.random.normal(0, scale, pts1.shape))
+    pts2 = pts1
     M = cv2.getAffineTransform(pts1, pts2)
     flip = np.random.randint(2)
 
