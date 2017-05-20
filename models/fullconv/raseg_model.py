@@ -16,7 +16,7 @@ NUM_CLASSES = raseg_input.NUM_CLASSES
 NUM_EXAMPLES_EPOCH_TRAIN = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_EPOCH_EVAL = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 MOVING_AVERAGE_DECAY = 0.9999
-NUM_EPOCHS_PER_DECAY = 3
+NUM_EPOCHS_PER_DECAY = 4
 LEARNING_RATE_DECAY_FACTOR = 0.15
 INITIAL_LEARNING_RATE = 0.0001
 
@@ -84,9 +84,9 @@ def dice_coeff_loss(logits, labels):
 
     # dice coeffs for every patch
     numerator = tf.multiply(intersection, 2)
-    numerator = tf.Print(numerator, [numerator], message='Numerator: ')
+    #numerator = tf.Print(numerator, [numerator], message='Numerator: ')
     denominator = tf.add(tf.add(preds_sum, labels_sum), stability)
-    denominator = tf.Print(denominator, [denominator], message='Denominator: ')
+    #denominator = tf.Print(denominator, [denominator], message='Denominator: ')
     dice_coeff = tf.truediv(numerator, denominator, name='dice_coeff_per_sample')
     #dice_coeff = tf.to_float(tf.truediv(tf.add(tf.multiply(intersection, 2), smoothing), 
     #                        tf.add(tf.add(preds_sum, labels_sum), smoothing), name='dice_coeff_per_sample'))
