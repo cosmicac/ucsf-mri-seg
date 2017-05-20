@@ -13,17 +13,14 @@ tf.app.flags.DEFINE_string('eval_dir', '../../../models/raseg_eval',
                            """Directory where to write event logs.""")
 tf.app.flags.DEFINE_string('eval_data', 'test',
                            """Either 'train_eval' or 'test'.""")
-tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_t2bmeonly',
+tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_fullimg_3',
                            """Directory where to read model checkpoints.""")
-tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 5,
+tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 8,
                             """How often to run the eval.""")
-tf.app.flags.DEFINE_integer('num_examples', 262144,
+tf.app.flags.DEFINE_integer('num_examples', 8,
                             """Number of examples to run.""")
-tf.app.flags.DEFINE_boolean('run_once', True,
+tf.app.flags.DEFINE_boolean('run_once', False,
                          """Whether to run eval only once.""")
-tf.app.flags.DEFINE_boolean('predict_slice', True,
-                         """Whether to predict a slice and save predictions""")
-
 
 def eval_once(saver, summary_writer, ops, summary_op, nexamples=None):
   """Run Eval once.
@@ -33,16 +30,11 @@ def eval_once(saver, summary_writer, ops, summary_op, nexamples=None):
     ops: Ops to run
     summary_op: Summary op.
   """
-
-  preds = []
-  # logits = []
-
   with tf.Session() as sess:
     ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
     if ckpt and ckpt.model_checkpoint_path:
       # Restores from checkpoint
       saver.restore(sess, ckpt.model_checkpoint_path)
-      #saver.restore(sess, '../models/raseg_train_2ch/model.ckpt-17312')
 
       # Assuming model_checkpoint_path looks something like:
       #   /my-favorite-path/raseg_train/model.ckpt-0,
@@ -71,27 +63,9 @@ def eval_once(saver, summary_writer, ops, summary_op, nexamples=None):
       while step < num_iter and not coord.should_stop():
         # Run the ops and whatever is needed to return their output
         predictions = sess.run(ops)
-        # Extend the predictions array with the predictions from the current batch
-        if FLAGS.predict_slice:
-          preds.extend(predictions[1].indices.flatten())
-        # preds.append(predictions[1].indices)
-
-        # Append the logits for the current batch
-        # logits.append(predictions[1].values)
-
-        # Increase the count of correct predictions
-        true_count += np.sum(predictions[0])
-        #true_count += np.sum(predictions)
+        true_count += np.sum(predictions)
         step += 1
-        if step % 200 == 0:
-          print("Processing batch {0}.".format(step))
 
-      # Save predictions
-      # np.save('../preds/img8d9_kmeans_preds', preds)
-
-      # Save logits
-      # np.save('../preds/img8d9_2ch_big_logits', logits)
-      
       # Compute precision @ 1.
       print(true_count)
       print(total_sample_count)
@@ -114,17 +88,11 @@ def eval_once(saver, summary_writer, ops, summary_op, nexamples=None):
 
 def evaluate():
 
-  if FLAGS.predict_slice:
-    # load images, both channels
-    images_and_labels = np.load('../data/datasets/t2imgs_and_prereg_labels.npy')
-    #pre_images = np.load('../data/datasets/pre_images_aligned_regfix.npy')
-
   """Eval model for a number of steps."""
   with tf.Graph().as_default() as g:
     # Get images and labels
     eval_data = FLAGS.eval_data == 'test'
 
-    print(FLAGS.imgn)
     images, labels = raseg_model.inputs(eval_data=eval_data)
 
     # Build a Graph that computes the logits predictions from the
@@ -133,8 +101,6 @@ def evaluate():
 
     # Calculate predictions.
     top_k_op = tf.nn.in_top_k(logits, labels, 1)
-    top_k_op_vals = tf.nn.top_k(logits, k=1)
-    # top_k_op_vals = tf.nn.top_k(logits, k=2, sorted=False)
 
     # Restore the moving average version of the learned variables for eval.
     variable_averages = tf.train.ExponentialMovingAverage(
@@ -144,37 +110,13 @@ def evaluate():
 
     # Build the summary operation based on the TF collection of Summaries.
     summary_op = tf.summary.merge_all()
-
     summary_writer = tf.summary.FileWriter(FLAGS.eval_dir, g)
 
     while True:
-
-      if FLAGS.predict_slice:
-
-        # find indexes of where we're going to predict
-        i, j = np.where(cluster_labels == hi_cluster)
-        preds = eval_once(saver, summary_writer, [top_k_op, top_k_op_vals], summary_op, nexamples=len(i))
-
-        print(len(i))
-        print(len(preds))
-        print(np.sum(preds))
-
-        # make the mask
-        mask = np.zeros(cluster_labels.shape)
-        for k in range(len(i)):
-          mask[i[k], j[k]] = preds[k]
-
-        np.save('../preds/img{0}d{1}_t2bmeonly_preds'.format(FLAGS.imgn, FLAGS.depthn), mask)
-
-      else:
-        eval_once(saver, summary_writer, [top_k_op, top_k_op_vals], summary_op)
-        #eval_once(saver, summary_writer, [top_k_op], summary_op)
-
+      eval_once(saver, summary_writer, [top_k_op], summary_op)
       if FLAGS.run_once:
         break
       time.sleep(FLAGS.eval_interval_secs)
-
-
 
 def main(argv=None):  # pylint: disable=unused-argument
   if tf.gfile.Exists(FLAGS.eval_dir):

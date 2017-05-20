@@ -546,8 +546,44 @@ def make_fc_fullimg_dataset():
     npy_to_bin_fullconv.flatten_and_bin(imgs2, labels2, '../../../../data/datasets/bins/train_and_label_fullimg_batch_2.bin')
     npy_to_bin_fullconv.flatten_and_bin(imgs3, labels3, '../../../../data/datasets/bins/train_and_label_fullimg_batch_3.bin')
     npy_to_bin_fullconv.flatten_and_bin(imgs4, labels4, '../../../../data/datasets/bins/train_and_label_fullimg_batch_4.bin')
+
+def make_fc_fullimg_valset():
+
+    # load images and labels
+    images_and_labels = np.load('../../../../data/datasets/images_and_labels.npy')
+    pre_images = np.load('../../../../data/datasets/pre_images.npy')
+
+    # validation set
+    ids = np.arange(0,8)
+    images_and_labels = images_and_labels[ids,:,:,:,:]
+    pre_images = pre_images[ids,:,:,:]
+ 
+    # assert that we made a validation set
+    assert images_and_labels.shape[0] == 8
+    assert pre_images.shape[0] == 8
+    assert pre_images.shape[0] == images_and_labels.shape[0]
+
+    c1, c2 = images_and_labels[:,0,:,:,:], pre_images
+    print(c1.shape)
+    print(c2.shape)
+    imgs = np.concatenate((c1[...,np.newaxis], c2[...,np.newaxis]), axis=4).astype('uint16')
+    labels = images_and_labels[:,1,:,:,:].astype('uint16')
+
+    print(imgs.shape)
+    print(labels.shape)
+    print(imgs.dtype)
+    print(labels.dtype)
+
+    imgs1 = imgs[:4,:,:,:,:]
+    imgs2 = imgs[4:,:,:,:,:]
+    
+    labels1 = labels[:4,:,:,:]
+    labels2 = labels[4:,:,:,:]
+    
+    npy_to_bin_fullconv.flatten_and_bin(imgs1, labels1, '../../../../data/datasets/bins/val_and_label_fullimg_batch_1.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs2, labels2, '../../../../data/datasets/bins/val_and_label_fullimg_batch_2.bin')
  
 if __name__ == '__main__':
 
-    make_fc_fullimg_dataset()
+    make_fc_fullimg_valset()
 	

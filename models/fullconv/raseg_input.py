@@ -11,7 +11,7 @@ NCHANNELS = 2
 
 NUM_CLASSES = 2
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 24
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 262144
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 8
 
 def read_train_bin(filename_queue):
   """Reads and parses patches from training data files.
@@ -123,8 +123,8 @@ def inputs(eval_data, data_dir, batch_size):
   else:
 
     filenames = [os.path.join(data_dir,
-     'img{0}d{1}_and_label_regfix_batch_{2}.bin'.format(imgn, depthn, i))
-                 for i in xrange(1, 2)]
+     'val_and_label_fullimg_batch_{2}.bin'.format(i))
+                 for i in xrange(1, 3)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
   for f in filenames:
@@ -165,12 +165,12 @@ def distort_image(image, labels):
     # Generate an affine transformation.
     scale = 1
     pts1 = np.float32([[PATCH_HEIGHT/2, PATCH_WIDTH/2], [PATCH_HEIGHT/2, PATCH_WIDTH/2 + 25], [PATCH_HEIGHT/2 - 25, PATCH_WIDTH/2]])
-    pts2 = np.float32(pts1 + np.random.normal(0, scale, pts1.shape))
-    #pts2 = pts1
+    #pts2 = np.float32(pts1 + np.random.normal(0, scale, pts1.shape))
+    pts2 = pts1
     M = cv2.getAffineTransform(pts1, pts2)
-    distort = np.random.randint(2)
+    distort = np.random.randint(5)
 
-    if (distort):
+    if (distort == 0):
         # Loop through each depth and apply the affine transformation
         for i in range(PATCH_DEPTH):
             image[:,:,i,0] = cv2.warpAffine(image[:,:,i,0], M, (PATCH_WIDTH, PATCH_HEIGHT))
