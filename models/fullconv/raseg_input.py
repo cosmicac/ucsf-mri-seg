@@ -123,7 +123,7 @@ def inputs(eval_data, data_dir, batch_size):
   else:
 
     filenames = [os.path.join(data_dir,
-     'val_and_label_fullimg_batch_{2}.bin'.format(i))
+     'val_and_label_fullimg_batch_{0}.bin'.format(i))
                  for i in xrange(1, 3)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 

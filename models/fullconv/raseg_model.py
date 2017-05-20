@@ -47,6 +47,35 @@ def dummy_loss(logits, labels):
     tf.add_to_collection('losses', dummy_loss)
     return tf.add_n(tf.get_collection('losses'), name='total_loss')
 
+def dice_coeff(logits, labels): 
+
+    # cast labels to floats
+    labels = tf.to_float(labels)
+
+    # softmax to get probabilities
+    softmax = tf.nn.softmax(logits, dim=-1, name='softmax')
+
+    # probabilites for non-healthy
+    softmax_non_healthy = tf.reshape(tf.slice(softmax, begin=[0,0,0,0,1], size=[-1,-1,-1,-1,1]), [FLAGS.batch_size,raseg_input.PATCH_HEIGHT,raseg_input.PATCH_WIDTH,raseg_input.PATCH_DEPTH])
+
+    # calculate intersection and both sums for every patch
+    intersection = tf.reduce_sum(tf.multiply(softmax_non_healthy, labels), axis=[1,2,3])
+    preds_sum = tf.reduce_sum(softmax_non_healthy, axis=[1,2,3], name='preds_sum')
+    labels_sum = tf.reduce_sum(labels, axis=[1,2,3], name='labels_sum')
+
+    # numerical stability
+    stability = tf.constant(0.00001, dtype=tf.float32)
+
+    # dice coeffs for every patch
+    numerator = tf.multiply(intersection, 2)
+    denominator = tf.add(tf.add(preds_sum, labels_sum), stability)
+    dice_coeff = tf.truediv(numerator, denominator, name='dice_coeff_per_sample')
+
+    # average dice coefficient for batch
+    dice_coeff_mean = tf.reduce_mean(dice_coeff, name='dice_coeff')
+
+    return dice_coeff_mean
+
 def dice_coeff_loss(logits, labels): 
 
     print("Logits shape: {0}".format(logits.get_shape()))

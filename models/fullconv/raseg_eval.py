@@ -56,25 +56,23 @@ def eval_once(saver, summary_writer, ops, summary_op, nexamples=None):
         nexamples = FLAGS.num_examples
 
       num_iter = int(math.ceil(nexamples / FLAGS.batch_size))
-      true_count = 0  # Count sthe number of correct predictions.
-      total_sample_count = num_iter * FLAGS.batch_size
+      dsc = []  # Store the DSC of each val image.
       step = 0
 
       while step < num_iter and not coord.should_stop():
         # Run the ops and whatever is needed to return their output
-        predictions = sess.run(ops)
-        true_count += np.sum(predictions)
+        dice_coeff = sess.run(ops)
+        print('Validation image {0}, DSC: {1}'.format(step, dice_coeff))
+        dsc.append(dice_coeff)
         step += 1
 
       # Compute precision @ 1.
-      print(true_count)
-      print(total_sample_count)
-      precision = true_count / total_sample_count
-      print('%s: precision @ 1 = %.3f' % (datetime.now(), precision))
+      mean_dsc = np.asscalar(np.mean(dsc))
+      print('%s: Mean DSC = %.4f' % (datetime.now(), mean_dsc))
 
       summary = tf.Summary()
       summary.ParseFromString(sess.run(summary_op))
-      summary.value.add(tag='Precision @ 1', simple_value=precision)
+      summary.value.add(tag='Mean DSC', simple_value=mean_dsc)
       summary_writer.add_summary(summary, global_step)
       
     except Exception as e:  # pylint: disable=broad-except
@@ -83,8 +81,7 @@ def eval_once(saver, summary_writer, ops, summary_op, nexamples=None):
     coord.request_stop()
     coord.join(threads, stop_grace_period_secs=10)
 
-  return preds
-
+  return mean_dsc
 
 def evaluate():
 
@@ -98,9 +95,7 @@ def evaluate():
     # Build a Graph that computes the logits predictions from the
     # inference model.
     logits = raseg_model.inference(images)
-
-    # Calculate predictions.
-    top_k_op = tf.nn.in_top_k(logits, labels, 1)
+    dice_coeff = raseg_model.dice_coeff(logits, labels)
 
     # Restore the moving average version of the learned variables for eval.
     variable_averages = tf.train.ExponentialMovingAverage(
@@ -113,7 +108,7 @@ def evaluate():
     summary_writer = tf.summary.FileWriter(FLAGS.eval_dir, g)
 
     while True:
-      eval_once(saver, summary_writer, [top_k_op], summary_op)
+      eval_once(saver, summary_writer, [dice_coeff], summary_op)
       if FLAGS.run_once:
         break
       time.sleep(FLAGS.eval_interval_secs)
