@@ -12,7 +12,7 @@ tf.app.flags.DEFINE_integer('max_steps', 1000000,
                             """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False,
                             """Whether to log device placement.""")
-tf.app.flags.DEFINE_boolean('train_from_checkpoint', False, """Whether to train from latest checkpoint""")
+tf.app.flags.DEFINE_boolean('train_from_checkpoint', True, """Whether to train from latest checkpoint""")
 
 
 def train():
@@ -29,8 +29,6 @@ def train():
 
     # Calculate loss.
     loss = raseg_model.dice_coeff_loss(logits, labels)
-    #loss = raseg_model.loss(logits, labels)
-    #loss = raseg_model.dummy_loss(logits, labels) 
 
     # Build a Graph that trains the model with one batch of examples and
     # updates the model parameters.
@@ -61,13 +59,21 @@ def train():
                                examples_per_sec, sec_per_batch))
 
     saver = tf.train.Saver()
+
+    # Configuration for the monitored training session.
+    config = tf.ConfigProto(log_device_placement=FLAGS.log_device_placement)
+    config.gpu_options.allow_growth = True
+
+    ckpt_saver = tf.train.Saver(max_to_keep=12)
+    ckpt_hook = tf.train.CheckpointSaverHook(FLAGS.train_dir, save_steps = 50, saver=ckpt_saver)
     with tf.train.MonitoredTrainingSession(
         checkpoint_dir=FLAGS.train_dir,
         hooks=[tf.train.StopAtStepHook(last_step=FLAGS.max_steps),
                tf.train.NanTensorHook(loss),
+               ckpt_hook,
                _LoggerHook()],
-        config=tf.ConfigProto(
-            log_device_placement=FLAGS.log_device_placement)) as mon_sess:
+               save_checkpoint_secs=None,
+        config=config) as mon_sess:
 
       ckpt = tf.train.get_checkpoint_state(FLAGS.train_dir)
       if FLAGS.train_from_checkpoint and ckpt and ckpt.model_checkpoint_path:
