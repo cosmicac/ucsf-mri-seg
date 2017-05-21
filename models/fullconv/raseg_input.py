@@ -165,8 +165,8 @@ def distort_image(image, labels):
     # Generate an affine transformation.
     scale = 1
     pts1 = np.float32([[PATCH_HEIGHT/2, PATCH_WIDTH/2], [PATCH_HEIGHT/2, PATCH_WIDTH/2 + 25], [PATCH_HEIGHT/2 - 25, PATCH_WIDTH/2]])
-    pts2 = np.float32(pts1 + np.random.normal(0, scale, pts1.shape))
-    #pts2 = pts1
+    #pts2 = np.float32(pts1 + np.random.normal(0, scale, pts1.shape))
+    pts2 = pts1
     M = cv2.getAffineTransform(pts1, pts2)
     distort = np.random.randint(5)
 
@@ -174,7 +174,7 @@ def distort_image(image, labels):
         # Loop through each depth and apply the affine transformation
         for i in range(PATCH_DEPTH):
             image[:,:,i,0] = cv2.warpAffine(image[:,:,i,0], M, (PATCH_WIDTH, PATCH_HEIGHT))
-            image[:,:,i,1] = cv2.warpAffine(image[:,:,i,1], M, (PATCH_WIDTH, PATCH_HEIGHT))
+            #image[:,:,i,1] = cv2.warpAffine(image[:,:,i,1], M, (PATCH_WIDTH, PATCH_HEIGHT))
             labels_warped = cv2.warpAffine(np.float32(labels[:,:,i]), M, (PATCH_WIDTH, PATCH_HEIGHT)) 
             labels[:,:,i] = np.int32(labels_warped) 
 
@@ -189,7 +189,7 @@ def distorted_inputs(data_dir, batch_size):
     images: Images. 5D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH, NCHANNELS] size.
     labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.
   """
-  filenames = [os.path.join(data_dir, 'train_and_label_fullimg_batch_{0}.bin'.format(i))
+  filenames = [os.path.join(data_dir, 'train_and_label_fullimg_bme_batch_{0}.bin'.format(i))
                  for i in xrange(1, 5)]
 
   for f in filenames:

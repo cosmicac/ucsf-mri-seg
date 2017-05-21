@@ -586,23 +586,16 @@ def make_fc_fullimg_valset():
 def make_fc_fullimg_bme_dataset():
 
     # load images and labels
-    images_and_labels = np.load('../../../../data/datasets/images_and_labels.npy')
-    pre_images = np.load('../../../../data/datasets/pre_images.npy')
+    images_and_labels = np.load('../../../../data/datasets/t2imgs_and_prereg_labels.npy')
 
     # validation set
-    ids = np.arange(8,32)
+    ids = np.arange(7,31)
     images_and_labels = images_and_labels[ids,:,:,:,:]
-    pre_images = pre_images[ids,:,:,:]
  
     # assert that we left out a validation set
     assert images_and_labels.shape[0] == 24
-    assert pre_images.shape[0] == 24
-    assert pre_images.shape[0] == images_and_labels.shape[0]
 
-    c1, c2 = images_and_labels[:,0,:,:,:], pre_images
-    print(c1.shape)
-    print(c2.shape)
-    imgs = np.concatenate((c1[...,np.newaxis], c2[...,np.newaxis]), axis=4).astype('uint16')
+    imgs = images_and_labels[:,0,:,:,:].astype('uint16').reshape((24, 512, 512, 20, 1))
     labels = images_and_labels[:,1,:,:,:].astype('uint16')
 
     print(imgs.shape)
@@ -620,13 +613,13 @@ def make_fc_fullimg_bme_dataset():
     labels3 = labels[12:18,:,:,:]
     labels4 = labels[18:,:,:,:]
     
-    npy_to_bin_fullconv.flatten_and_bin(imgs1, labels1, '../../../../data/datasets/bins/train_and_label_fullimg_batch_1.bin')
-    npy_to_bin_fullconv.flatten_and_bin(imgs2, labels2, '../../../../data/datasets/bins/train_and_label_fullimg_batch_2.bin')
-    npy_to_bin_fullconv.flatten_and_bin(imgs3, labels3, '../../../../data/datasets/bins/train_and_label_fullimg_batch_3.bin')
-    npy_to_bin_fullconv.flatten_and_bin(imgs4, labels4, '../../../../data/datasets/bins/train_and_label_fullimg_batch_4.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs1, labels1, '../../../../data/datasets/bins/train_and_label_fullimg_bme_batch_1.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs2, labels2, '../../../../data/datasets/bins/train_and_label_fullimg_bme_batch_2.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs3, labels3, '../../../../data/datasets/bins/train_and_label_fullimg_bme_batch_3.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs4, labels4, '../../../../data/datasets/bins/train_and_label_fullimg_bme_batch_4.bin')
 
 
 if __name__ == '__main__':
 
-    make_fc_fullimg_valset()
+    make_fc_fullimg_bme_dataset()
 	
