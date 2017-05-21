@@ -19,7 +19,7 @@ tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 8,
                             """How often to run the eval.""")
 tf.app.flags.DEFINE_integer('num_examples', 8,
                             """Number of examples to run.""")
-tf.app.flags.DEFINE_boolean('run_once', False,
+tf.app.flags.DEFINE_boolean('run_once', True,
                          """Whether to run eval only once.""")
 
 def eval_once(saver, summary_writer, ops, summary_op, nexamples=None):

@@ -49,7 +49,8 @@ def save_true_and_mask(iml, i, mask, savetag):
         img, img_labels = get_img_and_labels(iml, i)
 
         for d in range(20):
-            print(d)
+            if (d % 5 == 0):
+              print(d)
             overlay_mask_and_save(img[:,:,d], img_labels[:,:,d], '../../../../pictures/{0}/img{1}/img{2}d{3}_{4}_true'.format(savetag, i, i, d, savetag))
             overlay_mask_and_save(img[:,:,d], mask[:,:,d], '../../../../pictures/{0}/img{1}/img{2}d{3}_{4}_pred'.format(savetag, i, i, d, savetag))
 
@@ -204,8 +205,8 @@ if __name__ == '__main__':
     # load all images and labels
     iml = np.load('../../../../data/datasets/images_and_labels.npy')
     #imgn = 1
-    tag = 'fullimg'
-    for imgn in range(7,8):
+    tag = 'fullimg_4_571'
+    for imgn in range(8):
         mask = load_preds(imgn, tag)
         save_true_and_mask(iml, imgn, mask, tag)
         print(dsc(mask, iml[imgn,1,:,:,:])) 

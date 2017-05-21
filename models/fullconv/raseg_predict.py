@@ -12,10 +12,10 @@ FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string('eval_dir', '../../../models/raseg_predict',
                            """Directory where to write event logs.""")
-tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_fullimg',
+tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_fullimg_4',
                            """Directory where to read model checkpoints.""")
 tf.app.flags.DEFINE_integer('imgn', 0, """Image number to evaluate.""")
-tf.app.flags.DEFINE_string('savetag', 'fullimg', """Tag to save predictions as. """)
+tf.app.flags.DEFINE_string('savetag', 'fullimg_4_331', """Tag to save predictions as. """)
 
 """Assumes image is of dimensions [height, width, depth, nchannels]"""
 def normalize(image):

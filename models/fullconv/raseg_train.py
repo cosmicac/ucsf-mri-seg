@@ -5,14 +5,14 @@ import raseg_model
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('train_dir', '../../../models/raseg_train_fullimg_3',
+tf.app.flags.DEFINE_string('train_dir', '../../../models/raseg_train_fullimg_bme',
                            """Directory where to write event logs """
                            """and checkpoint.""")
 tf.app.flags.DEFINE_integer('max_steps', 1000000,
                             """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False,
                             """Whether to log device placement.""")
-tf.app.flags.DEFINE_boolean('train_from_checkpoint', True, """Whether to train from latest checkpoint""")
+tf.app.flags.DEFINE_boolean('train_from_checkpoint', False, """Whether to train from latest checkpoint""")
 
 
 def train():
@@ -62,10 +62,10 @@ def train():
 
     # Configuration for the monitored training session.
     config = tf.ConfigProto(log_device_placement=FLAGS.log_device_placement)
-    config.gpu_options.allow_growth = True
+    #config.gpu_options.allow_growth = True
 
-    ckpt_saver = tf.train.Saver(max_to_keep=12)
-    ckpt_hook = tf.train.CheckpointSaverHook(FLAGS.train_dir, save_steps = 50, saver=ckpt_saver)
+    ckpt_saver = tf.train.Saver(max_to_keep=20)
+    ckpt_hook = tf.train.CheckpointSaverHook(FLAGS.train_dir, save_steps = 30, saver=ckpt_saver)
     with tf.train.MonitoredTrainingSession(
         checkpoint_dir=FLAGS.train_dir,
         hooks=[tf.train.StopAtStepHook(last_step=FLAGS.max_steps),

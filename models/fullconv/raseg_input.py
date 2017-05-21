@@ -7,11 +7,11 @@ import numpy as np
 PATCH_HEIGHT = 512
 PATCH_WIDTH = 512
 PATCH_DEPTH = 20
-NCHANNELS = 2
+NCHANNELS = 1
 
 NUM_CLASSES = 2
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 24
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 8
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 7
 
 def read_train_bin(filename_queue):
   """Reads and parses patches from training data files.
@@ -49,7 +49,7 @@ def read_train_bin(filename_queue):
   record_bytes = label_bytes + image_bytes
 
   # should be 512*512*20*2*2 + 512*512*20*2
-  assert record_bytes == 31457280
+  assert record_bytes == 20971520
 
   # Read a record, getting filenames from the filename_queue.  No
   # header or footer in the format, so we leave header_bytes
@@ -117,14 +117,14 @@ def inputs(eval_data, data_dir, batch_size):
     labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.
   """
   if not eval_data:
-    filenames = [os.path.join(data_dir, 'train_and_label_fullconv_batch_{0}.bin'.format(i))
+    filenames = [os.path.join(data_dir, 'train_and_label_fullconv_bme_batch_{0}.bin'.format(i))
                  for i in xrange(1, 5)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
   else:
 
     filenames = [os.path.join(data_dir,
      'val_and_label_fullimg_batch_{0}.bin'.format(i))
-                 for i in xrange(1, 3)]
+                 for i in xrange(1, 2)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
   for f in filenames:
@@ -165,8 +165,8 @@ def distort_image(image, labels):
     # Generate an affine transformation.
     scale = 1
     pts1 = np.float32([[PATCH_HEIGHT/2, PATCH_WIDTH/2], [PATCH_HEIGHT/2, PATCH_WIDTH/2 + 25], [PATCH_HEIGHT/2 - 25, PATCH_WIDTH/2]])
-    #pts2 = np.float32(pts1 + np.random.normal(0, scale, pts1.shape))
-    pts2 = pts1
+    pts2 = np.float32(pts1 + np.random.normal(0, scale, pts1.shape))
+    #pts2 = pts1
     M = cv2.getAffineTransform(pts1, pts2)
     distort = np.random.randint(5)
 
