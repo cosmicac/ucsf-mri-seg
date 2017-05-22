@@ -72,7 +72,7 @@ def train():
                tf.train.NanTensorHook(loss),
                ckpt_hook,
                _LoggerHook()],
-               save_checkpoint_secs=None,
+               save_checkpoint_secs=-1,
         config=config) as mon_sess:
 
       ckpt = tf.train.get_checkpoint_state(FLAGS.train_dir)
