@@ -16,9 +16,9 @@ NUM_CLASSES = raseg_input.NUM_CLASSES
 NUM_EXAMPLES_EPOCH_TRAIN = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_EPOCH_EVAL = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 MOVING_AVERAGE_DECAY = 0.9999
-NUM_EPOCHS_PER_DECAY = 6
-LEARNING_RATE_DECAY_FACTOR = 0.25
-INITIAL_LEARNING_RATE = 0.00001
+NUM_EPOCHS_PER_DECAY = 3
+LEARNING_RATE_DECAY_FACTOR = 0.5
+INITIAL_LEARNING_RATE = 0.001
 
 
 def variable_on_cpu(name, shape, initializer):
@@ -501,7 +501,7 @@ def train(total_loss, global_step):
     
     # compute gradients
     with tf.control_dependencies([loss_averages_op]):
-    	opt = tf.train.AdamOptimizer(learning_rate=lr, epsilon=1e-04)
+    	opt = tf.train.AdamOptimizer(learning_rate=lr, epsilon=0.1)
     	grads = opt.compute_gradients(total_loss)
     
     # apply gradients
