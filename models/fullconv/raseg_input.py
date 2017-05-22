@@ -117,13 +117,13 @@ def inputs(eval_data, data_dir, batch_size):
     labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.
   """
   if not eval_data:
-    filenames = [os.path.join(data_dir, 'train_and_label_fullconv_bme_batch_{0}.bin'.format(i))
+    filenames = [os.path.join(data_dir, 'train_and_label_fullconv_bme256_batch_{0}.bin'.format(i))
                  for i in xrange(1, 5)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
   else:
 
     filenames = [os.path.join(data_dir,
-     'val_and_label_fullimg_batch_{0}.bin'.format(i))
+     'val_and_label_fullconv_bme256_batch_{0}.bin'.format(i))
                  for i in xrange(1, 2)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
