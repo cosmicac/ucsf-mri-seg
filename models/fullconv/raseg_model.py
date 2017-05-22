@@ -99,7 +99,6 @@ def dice_coeff_loss(logits, labels):
 
     preds_sum = tf.reduce_sum(softmax_non_healthy, axis=[1,2,3], name='preds_sum')
     preds_sum = tf.Print(preds_sum, [preds_sum], message='Preds: ')
-    #preds_sum = tf.multiply(preds_sum, 3)
     print("Preds sum shape: {0}".format(preds_sum.get_shape()))
 
     labels_sum = tf.reduce_sum(labels, axis=[1,2,3], name='labels_sum')
@@ -203,6 +202,13 @@ def inputs(eval_data):
     labels = tf.cast(labels, tf.float16)
   return images, labels
 
+def batch_norm(batch, n_channels):
+    beta = variable_on_cpu('beta', shape=[n_channels], tf.constant_initializer(0.0))
+    gamma = variable_on_cpu('gamma', shape=[n_channels], tf.constant_initializer(1.0))
+    mean, var = tf.nn.moments(batch, axes=[0,1,2,3])
+    batch = tf.nn.batch_normalization(batch, mean, var, beta, gamma, 1e-05)
+    return batch
+ 
 def inference(voxel_regions):
 
     # height 0, convolution 1
@@ -212,9 +218,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h0_conv1 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h0_conv1, axes=[0,1,2,3])
-        h0_conv1 = tf.nn.batch_normalization(h0_conv1, mean, var)
-    
+        h0_conv1 = batch_norm(h0_conv1, 32)
+   
     # height 0, convolution 2
     with tf.variable_scope('h0_conv2') as scope:
         kernel = variable_with_weight_decay('weights', shape=[5, 5, 5, 32, 32], stddev=5e-2, wd=0.00)
@@ -222,9 +227,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h0_conv2 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h0_conv2, axes=[0,1,2,3])
-        h0_conv2 = tf.nn.batch_normalization(h0_conv2, mean, var)
- 
+        h0_conv2 = batch_norm(h0_conv2, 32)
+
     # downsampling from height 0 to height 1
     with tf.variable_scope('down1') as scope:
         kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 32, 32], stddev=5e-2, wd=0.00)
@@ -232,9 +236,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         down1 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(down1, axes=[0,1,2,3])
-        down1 = tf.nn.batch_normalization(down1, mean, var)
- 
+        down1 = batch_norm(down1, 32)
+
     # height 1, convolution 1
     with tf.variable_scope('h1_conv1') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 32, 64], stddev=5e-2, wd=0.00)
@@ -242,9 +245,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h1_conv1 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h1_conv1, axes=[0,1,2,3])
-        h1_conv1 = tf.nn.batch_normalization(h1_conv1, mean, var)
- 
+        h1_conv1 = batch_norm(h1_conv1, 64)
+
     # height 1, convolution 2
     with tf.variable_scope('h1_conv2') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 64, 64], stddev=5e-2, wd=0.00)
@@ -252,9 +254,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h1_conv2 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h1_conv2, axes=[0,1,2,3])
-        h1_conv2 = tf.nn.batch_normalization(h1_conv2, mean, var)
- 
+        h1_conv2 = batch_norm(h1_conv2, 64)
+
     # downsampling from height 1 to height 2
     with tf.variable_scope('down2') as scope:
         kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 64, 64], stddev=5e-2, wd=0.00)
@@ -262,9 +263,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         down2 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(down2, axes=[0,1,2,3])
-        down2 = tf.nn.batch_normalization(down2, mean, var)
- 
+        down2 = batch_norm(down2, 64)
+
     # height 2, convolution 1
     with tf.variable_scope('h2_conv1') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 64, 128], stddev=5e-2, wd=0.00)
@@ -272,9 +272,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h2_conv1 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h2_conv1, axes=[0,1,2,3])
-        h2_conv1 = tf.nn.batch_normalization(h2_conv1, mean, var)
- 
+        h2_conv1 = batch_norm(h2_conv1, 128)
+
     # height 2, convolution 2
     with tf.variable_scope('h2_conv2') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 128, 128], stddev=5e-2, wd=0.00)
@@ -282,9 +281,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h2_conv2 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h2_conv2, axes=[0,1,2,3])
-        h2_conv2 = tf.nn.batch_normalization(h2_conv2, mean, var)
- 
+        h2_conv2 = batch_norm(h2_conv2, 128)
+
     # downsampling from height 2 to height 3
     with tf.variable_scope('down3') as scope:
         kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 128, 128], stddev=5e-2, wd=0.00)
@@ -292,9 +290,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         down3 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(down3, axes=[0,1,2,3])
-        down3 = tf.nn.batch_normalization(down3, mean, var)
- 
+        down3 = batch_norm(down3, 128)
+
     # height 3, convolution 1
     with tf.variable_scope('h3_conv1') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 128, 256], stddev=5e-2, wd=0.00)
@@ -302,9 +299,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h3_conv1 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h3_conv1, axes=[0,1,2,3])
-        h3_conv1 = tf.nn.batch_normalization(h3_conv1, mean, var)
- 
+        h3_conv1 = batch_norm(h3_conv1, 256)
+
     # height 3, convolution 2
     with tf.variable_scope('h3_conv2') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 256, 256], stddev=5e-2, wd=0.00)
@@ -312,9 +308,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h3_conv2 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h3_conv2, axes=[0,1,2,3])
-        h3_conv2 = tf.nn.batch_normalization(h3_conv2, mean, var)
- 
+        h3_conv2 = batch_norm(h3_conv2, 256)
+
     # downsampling from height 3 to height 4
     with tf.variable_scope('down4') as scope:
         kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 256, 256], stddev=5e-2, wd=0.00)
@@ -322,9 +317,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         down4 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(down4, axes=[0,1,2,3])
-        down4 = tf.nn.batch_normalization(down4, mean, var)
- 
+        down4 = batch_norm(down4, 256)
+
     # height 4, convolution 1
     with tf.variable_scope('h4_conv1') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 256, 512], stddev=5e-2, wd=0.00)
@@ -332,9 +326,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [512], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h4_conv1 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h4_conv1, axes=[0,1,2,3])
-        h4_conv1 = tf.nn.batch_normalization(h4_conv1, mean, var)
- 
+        h4_conv1 = batch_norm(h4_conv1, 512)
+
     # height 4, convolution 2
     with tf.variable_scope('h4_conv2') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 512, 512], stddev=5e-2, wd=0.00)
@@ -342,9 +335,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [512], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h4_conv2 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h4_conv2, axes=[0,1,2,3])
-        h4_conv2 = tf.nn.batch_normalization(h4_conv2, mean, var)
- 
+        h4_conv2 = batch_norm(h4_conv2, 512)
+
     # upsampling from height 4 to height 3 and feed height 3 forward
     with tf.variable_scope('up1') as scope:
         kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 256, 512], stddev=5e-2, wd=0.00)
@@ -355,8 +347,7 @@ def inference(voxel_regions):
         up1 = tf.nn.relu(sums, name=scope.name)
         up1_concat = tf.concat_v2(values=[h3_conv2, up1], axis=4)
         #up1_concat = tf.concat(values=[h3_conv2, up1], concat_dim=4)
-        mean, var = tf.nn.moments(up1_concat, axes=[0,1,2,3])
-        up1_concat = tf.nn.batch_normalization(up1_concat, mean, var)
+        up1_concat = batch_norm(up1_concat, 512)
  
     # height 3, convolution 3
     with tf.variable_scope('h3_conv3') as scope:
@@ -365,9 +356,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h3_conv3 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h3_conv3, axes=[0,1,2,3])
-        h3_conv3 = tf.nn.batch_normalization(h3_conv3, mean, var)
- 
+        h3_conv3 = batch_norm(h3_conv3, 256)
+
     # height 3, convolution 4
     with tf.variable_scope('h3_conv4') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 256, 256], stddev=5e-2, wd=0.00)
@@ -375,9 +365,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h3_conv4 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h3_conv4, axes=[0,1,2,3])
-        h3_conv4 = tf.nn.batch_normalization(h3_conv4, mean, var)
- 
+        h3_conv4 = batch_norm(h3_conv4, 256)
+
     # upsampling from height 3 to height 2 and feed height 2 forward
     with tf.variable_scope('up2') as scope:
         kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 128, 256], stddev=5e-2, wd=0.00)
@@ -388,9 +377,8 @@ def inference(voxel_regions):
         up2 = tf.nn.relu(sums, name=scope.name)
         up2_concat = tf.concat_v2(values=[h2_conv2, up2], axis=4)
         #up2_concat = tf.concat(values=[h2_conv2, up2], concat_dim=4)
-        mean, var = tf.nn.moments(up2_concat, axes=[0,1,2,3])
-        up2_concat = tf.nn.batch_normalization(up2_concat, mean, var)
- 
+        up2_concat = batch_norm(up2_concat, 256)
+
     # height 2, convolution 3
     with tf.variable_scope('h2_conv3') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 256, 128], stddev=5e-2, wd=0.00)
@@ -398,9 +386,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h2_conv3 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h2_conv3, axes=[0,1,2,3])
-        h2_conv3 = tf.nn.batch_normalization(h2_conv3, mean, var)
- 
+        h2_conv3 = batch_norm(h2_conv3, 128)
+
     # height 2, convolution 4
     with tf.variable_scope('h2_conv4') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 128, 128], stddev=5e-2, wd=0.00)
@@ -408,9 +395,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h2_conv4 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h2_conv4, axes=[0,1,2,3])
-        h2_conv4 = tf.nn.batch_normalization(h2_conv4, mean, var)
- 
+        h2_conv4 = batch_norm(h2_conv4, 128)
+
     # upsampling from height 2 to height 2 and feed height 1 forward
     with tf.variable_scope('up3') as scope:
         kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 64, 128], stddev=5e-2, wd=0.00)
@@ -421,9 +407,8 @@ def inference(voxel_regions):
         up3 = tf.nn.relu(sums, name=scope.name)
         up3_concat = tf.concat_v2(values=[h1_conv2, up3], axis=4)
         #up3_concat = tf.concat(values=[h1_conv2, up3], concat_dim=4)
-        mean, var = tf.nn.moments(up3_concat, axes=[0,1,2,3])
-        up3_concat = tf.nn.batch_normalization(up3_concat, mean, var)
- 
+        up3_concat = batch_norm(up3_concat, 128)
+
     # height 1, convolution 3
     with tf.variable_scope('h1_conv3') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 128, 64], stddev=5e-2, wd=0.00)
@@ -431,9 +416,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h1_conv3 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h1_conv3, axes=[0,1,2,3])
-        h1_conv3 = tf.nn.batch_normalization(h1_conv3, mean, var)
- 
+        h1_conv3 = batch_norm(h1_conv3, 64)
+
     # height 1, convolution 4
     with tf.variable_scope('h1_conv4') as scope:
         kernel = variable_with_weight_decay('weights', shape=[3, 3, 3, 64, 64], stddev=5e-2, wd=0.00)
@@ -441,9 +425,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h1_conv4 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h1_conv4, axes=[0,1,2,3])
-        h1_conv4 = tf.nn.batch_normalization(h1_conv4, mean, var)
- 
+        h1_conv4 = batch_norm(h1_conv4, 64)
+
     # upsampling from height 1 to height 0 and feed height 0 forward
     with tf.variable_scope('up4') as scope:
         kernel = variable_with_weight_decay('weights', shape=[2, 2, 2, 32, 64], stddev=5e-2, wd=0.00)
@@ -454,9 +437,8 @@ def inference(voxel_regions):
         up4 = tf.nn.relu(sums, name=scope.name)
         up4_concat = tf.concat_v2(values=[h0_conv2, up4], axis=4)
         #up4_concat = tf.concat(values=[h0_conv2, up4], concat_dim=4)
-        mean, var = tf.nn.moments(up4_concat, axes=[0,1,2,3])
-        up4_concat = tf.nn.batch_normalization(up4_concat, mean, var)
- 
+        up4_concat = batch_norm(up4_concat, 64)
+
     # height 0, convolution 3
     with tf.variable_scope('h0_conv3') as scope:
         kernel = variable_with_weight_decay('weights', shape=[5, 5, 5, 64, 32], stddev=5e-2, wd=0.00)
@@ -464,9 +446,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h0_conv3 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h0_conv3, axes=[0,1,2,3])
-        h0_conv3 = tf.nn.batch_normalization(h0_conv3, mean, var)
- 
+        h0_conv3 = batch_norm(h0_conv3, 32)
+
     # height 0, convolution 4
     with tf.variable_scope('h0_conv4') as scope:
         kernel = variable_with_weight_decay('weights', shape=[5, 5, 5, 32, 32], stddev=5e-2, wd=0.00)
@@ -474,9 +455,8 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h0_conv4 = tf.nn.relu(sums, name=scope.name)
-        mean, var = tf.nn.moments(h0_conv4, axes=[0,1,2,3])
-        h0_conv4 = tf.nn.batch_normalization(h0_conv4, mean, var)
- 
+        h0_conv4 = batch_norm(h0_conv4, 32)
+
     # output, logits
     with tf.variable_scope('logits') as scope:
         kernel = variable_with_weight_decay('weights', shape=[1, 1, 1, 32, 2], stddev=5e-2, wd=0.00)
