@@ -5,7 +5,7 @@ import raseg_model
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('train_dir', '../../../models/raseg_train_fullimg_bme_2',
+tf.app.flags.DEFINE_string('train_dir', '../../../models/raseg_train_fullimg_bmebn',
                            """Directory where to write event logs """
                            """and checkpoint.""")
 tf.app.flags.DEFINE_integer('max_steps', 1000000,
