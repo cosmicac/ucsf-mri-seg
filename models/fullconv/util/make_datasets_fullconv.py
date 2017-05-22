@@ -6,9 +6,9 @@ import time
 import npy_to_bin_fullconv
 from sklearn.cluster import KMeans
 
-NUM_SAMPLE_TRAIN = 2400
+NUM_SAMPLE_TRAIN = 1200
 NUM_SAMPLE_TEST = 40000
-PATCH_SIZE = (128, 128, 16)
+PATCH_SIZE = (256, 256, 20)
 PATCH_MARGINS = (int(PATCH_SIZE[0]/2), int(PATCH_SIZE[1]/2), int(PATCH_SIZE[2]/2))
 
 def extract_patch(img, center):
@@ -73,37 +73,6 @@ def sample_centers(labels, expected_labels):
     
     return centers
 
-def make_dataset_one_channel():
-
-	# load images and labels
-	images_and_labels = np.load('../../data/datasets/images_and_labels.npy')
-
-	n = len(images_and_labels)
-	print(n)
-	
-	train = []
-	train_labels = []
-
-	for i in range(int(NUM_SAMPLE_TRAIN)):
-
-		if i % 200 == 0:
-			print('extracting example {0}'.format(i))
-
-		# pick image at random
-		img_and_label = images_and_labels[np.random.randint(0, n)]
-
-		# pick a label, 0 or 1, at random
-		rlabel = np.random.randint(2)
-
-		# extract patch
-		patch = extract_patch(img_and_label[0], labels=img_and_label[1], expected_label=rlabel)
-		train.append(patch)
-		train_labels.append(rlabel)
-
-	print("saving training set")
-	np.save('../../data/datasets/train_mix', np.array(train))
-	np.save('../../data/datasets/train_labels_mix', np.array(train_labels))
-
 def make_dataset_with_two_channels(c1, c2, labs):
 
     n = c1.shape[0]
@@ -149,321 +118,46 @@ def make_dataset_with_two_channels(c1, c2, labs):
 	
     return train, train_labels
 
-"""
-Input: 	full 512x512x20 image labels, 
-		sequence of expected labels (sequence of 0's and 1's)
-		full 512x512x20 cluster labels
-		the expected cluster to take
-output: sequence of patch centers that match the input sequence of expected_labels
-"""
-def sample_centers_within_cluster(labels, expected_labels, clusters, expected_cluster):
+def make_dataset_with_one_channel(c1, labs):
 
-	# map the possible labels to the possible center indexes 
-	labs_to_centers = {}
-	for l in np.unique(expected_labels):
-		labs_to_centers[l] = np.where((labels == l) & (clusters == expected_cluster))
+    n = c1.shape[0]
+    
+    train = np.empty((NUM_SAMPLE_TRAIN, PATCH_SIZE[0], PATCH_SIZE[1], PATCH_SIZE[2], 1), dtype='uint16') 
+    train_labels = np.empty((NUM_SAMPLE_TRAIN,PATCH_SIZE[0],PATCH_SIZE[1],PATCH_SIZE[2]), dtype='uint16')
+    
+    count = 0
+    for i in range(n):
 
-	# randomly select patch centers
-	centers = []
-	for el in expected_labels:
-		i, j, k = labs_to_centers[el]
-		ri = np.random.randint(0, len(i))
-		centers.append((i[ri], j[ri], k[ri]))
+        # generate random label and center based on radom label
+        center_labs = np.random.randint(2, size=int(NUM_SAMPLE_TRAIN/n))
+        centers = sample_centers(labs[i], center_labs)
+        
+        # extract patches for each center
+        for c in centers:
 
-	return centers
+            if count % 200 == 0:
+                print('extracting example {0}'.format(count))
 
-def make_dataset_with_one_channels_kmeans_t2(c1, labs):
+            # extract patches from channels
+            c1patch = extract_patch(c1[i], c).reshape((PATCH_SIZE[0],PATCH_SIZE[1],PATCH_SIZE[2],1))
+            lab_patch = extract_patch(labs[i], c)
 
-	n = c1.shape[0]
+            # append to datasets
+            train[count,:,:,:,:] = c1patch
+            train_labels[count,:,:,:] = lab_patch
 
-	train = np.empty((NUM_SAMPLE_TRAIN,32,32,8,1), dtype='uint16')
-	train_labels = []
-	count = 0
+	    # increment counter
+            count += 1
 
-	print(labs.shape)
-	for i in range(n):
+    # make into np arrays
+    train , train_labels = np.array(train).astype('uint16'), np.array(train_labels).astype('uint16')
 
-		# Do kmeans and find class with higher intensity
-		kmeans_i = KMeans(n_clusters=2).fit(c1[i].reshape((512*512*20,1)))
-		cluster_labels = kmeans_i.labels_.reshape((512,512,20))
-		hi_cluster = np.argmax(kmeans_i.cluster_centers_)
-
-		# generate labels 50/50 positive negative
-		train_labels_i = np.random.randint(1, size=int(NUM_SAMPLE_TRAIN/n))
-		train_labels.extend(train_labels_i)
-
-		# get centers that correspond to generated labels
-		centers = sample_centers_within_cluster(labs[i], train_labels_i, cluster_labels, hi_cluster)
-
-		# go and extract the patches for each center and add to our training array
-		for c in centers:
-
-			if count % 200 == 0:
-				print('extracting healthy example {0}'.format(count))
-
-			# extract patches from channels
-			patch = extract_patch(c1[i], c).reshape((32,32,8,1))
-
-			# append to datasets
-			train[count,:,:,:,:] = patch
-
-			# increment counter
-			count += 1
-
-	# make into np arrays
-	train_labels = np.array(train_labels, dtype='uint16')
-	print(train.dtype)
-	print(train_labels.dtype)
+    # shuffle 
+    p = np.random.permutation(NUM_SAMPLE_TRAIN)
+    train = train[p]
+    train_labels = train_labels[p]
 	
-	return train, train_labels
-
-
-
-def make_dataset_with_two_channels_kmeans(c1, c2, labs):
-
-	n = c1.shape[0]
-
-	train = np.empty((NUM_SAMPLE_TRAIN,32,32,8,2), dtype='uint16')
-	train_labels = []
-	count = 0
-
-	print(labs.shape)
-	for i in range(n):
-
-		# Do kmeans and find class with higher intensity
-		kmeans_i = KMeans(n_clusters=2).fit(c1[i].reshape((512*512*20,1)))
-		cluster_labels = kmeans_i.labels_.reshape((512,512,20))
-		hi_cluster = np.argmax(kmeans_i.cluster_centers_)
-
-		# generate labels 50/50 positive negative
-		train_labels_i = np.random.randint(2, size=int(NUM_SAMPLE_TRAIN/n))
-		train_labels.extend(train_labels_i)
-
-		# get centers that correspond to generated labels
-		centers = sample_centers_within_cluster(labs[i], train_labels_i, cluster_labels, hi_cluster)
-
-		# go and extract the patches for each center and add to our training array
-		for c in centers:
-
-			if count % 200 == 0:
-				print('extracting syn example {0}'.format(count))
-
-			# extract patches from channels
-			c1patch = extract_patch(c1[i], c)
-			c2patch = extract_patch(c2[i], c)
-
-			# concatenate the patches
-			patch = np.concatenate((c1patch[...,np.newaxis], c2patch[...,np.newaxis]), axis=3)
-			# append to datasets
-			train[count,:,:,:,:] = patch
-
-			# increment counter
-			count += 1
-
-	# make into np arrays
-	train_labels = np.array(train_labels, dtype='uint16')
-	print(train.dtype)
-	print(train_labels.dtype)
-	
-	return train, train_labels
-
-def make_bme_dataset_1c(c1, merged_labels):
-
-	n = c1.shape[0]
-
-	train = []
-	train_labels = []
-	count = 1
-
-	for i in range(n):
-
-		labels = merged_labels[i]
-
-		# find centers that are bme
-		centers =  zip(*np.where(labels == 1))
-
-		# loop through and make extract the patches
-		for c in centers:
-
-			if count % 200 == 0: 
-				print('extracting bme example {0}'.format(count))
-	
-			# extract patch
-			patch = extract_patch(c1[i], c).reshape((32,32,8,1))
-
-			# append patches
-			train.append(patch)
-			train_labels.append(1)
-
-			count += 1
-
-	# make into np arrays
-	train, train_labels = np.array(train, dtype='uint16'), np.array(train_labels, dtype='uint16')
-	print(train.dtype)
-	print(train_labels.dtype)
-
-	return train, train_labels
-
-def make_bme_dataset(c1, c2, merged_labels):
-	
-	n = c1.shape[0]
-
-	train = []
-	train_labels = []
-	count = 1
-
-	for i in range(n):
-
-		labels = merged_labels[i]
-
-		# find centers that are bme
-		centers =  zip(*np.where(labels == 2))
-
-		# loop through and make extract the patches
-		for c in centers:
-
-			if count % 200 == 0: 
-				print('extracting bme example {0}'.format(count))
-	
-			# extract patch
-			c1patch = extract_patch(c1[i], c)
-			c2patch = extract_patch(c2[i], c)
-
-			# concatenate patches
-			patch = np.concatenate((c1patch[...,np.newaxis], c2patch[...,np.newaxis]), axis=3)
-
-			# append patches
-			train.append(patch)
-			train_labels.append(2)
-
-			count += 1
-
-	# make into np arrays
-	train, train_labels = np.array(train, dtype='uint16'), np.array(train_labels, dtype='uint16')
-	print(train.dtype)
-	print(train_labels.dtype)
-
-	return train, train_labels
-
-def maket2dataset():
-
-	# load images and labels
-	images_and_labels = np.load('../../data/datasets/t2imgs_and_prereg_labels.npy')
-
-	# validation set 
-	ids = (np.arange(6, 29))
-	images_and_labels = images_and_labels[ids,:,:,:,:]
-
-	# assert validation set
-	assert images_and_labels.shape[0] == 23
-
-	# make bme patches and healthy patches
-	c1, labels = images_and_labels[:,0,:,:,:], images_and_labels[:,1,:,:,:]
-	bme_imgs, bme_labels = make_bme_dataset_1c(c1, labels)
-	h_imgs, h_labels = make_dataset_with_one_channels_kmeans_t2(c1, labels)
-
-	# combine the two
-	imgs = np.concatenate((h_imgs, bme_imgs), axis=0)
-	labels = np.concatenate((h_labels, bme_labels), axis=0)
-
-	# shuffle the dataset
-	print("shuffling")
-	print(imgs.shape)
-	print(labels.shape)
-	p = np.random.permutation(imgs.shape[0])
-	imgs = imgs[p]
-	labels = labels[p]
-	print("done shuffling")
-
-	print(imgs.dtype)
-	print(labels.dtype)
-	print(imgs.shape)
-	print(labels.shape)
-
-	imgs1 = imgs[:100000,:,:,:,:]
-	imgs2 = imgs[100000:200000,:,:,:,:]
-	imgs3 = imgs[200000:300000,:,:,:,:]
-	imgs4 = imgs[300000:,:,:,:,:]
-	#imgs5 = imgs[400000:,:,:,:,:]
-	#imgs6 = imgs[500000:,:,:,:,:]
-	
-	labels1 = labels[:100000]
-	labels2 = labels[100000:200000]
-	labels3 = labels[200000:300000]
-	labels4 = labels[300000:]
-	#labels5 = labels[400000:]
-	#labels6 = labels[500000:]	
-
-	npy_to_bin.flatten_and_bin(imgs1, labels1, '../../data/datasets/bins/train_and_label_t2bmeonly_batch_1.bin')
-	npy_to_bin.flatten_and_bin(imgs2, labels2, '../../data/datasets/bins/train_and_label_t2bmeonly_batch_2.bin')
-	npy_to_bin.flatten_and_bin(imgs3, labels3, '../../data/datasets/bins/train_and_label_t2bmeonly_batch_3.bin')
-	npy_to_bin.flatten_and_bin(imgs4, labels4, '../../data/datasets/bins/train_and_label_t2bmeonly_batch_4.bin')
-	#npy_to_bin.flatten_and_bin(imgs5, labels5, '../../data/datasets/bins/train_and_label_t2bmeonly_batch_5.bin')
-
-def maket1dataset():
-
-	# load images and labels
-	images_and_labels = np.load('../../data/datasets/images_and_labels_bmesyn_regfix.npy')
-	pre_images = np.load('../../data/datasets/pre_images_aligned_regfix.npy')
-
-	# valdiation set
-	ids = np.concatenate((np.arange(5), np.arange(11,29)))
-	images_and_labels = images_and_labels[ids,:,:,:,:]
-	pre_images = pre_images[ids,:,:,:]
-
-	# assert that we left out a validation set
-	assert images_and_labels.shape[0] == 23
-	assert pre_images.shape[0] == 23
-	assert pre_images.shape[0] == images_and_labels.shape[0]
-
-	# make synivotis patches and bme patches
-	c1, c2, labels = images_and_labels[:,0,:,:,:], pre_images, images_and_labels[:,1,:,:,:]
-	bme_imgs, bme_labels = make_bme_dataset(c1, c2, labels)
-	syn_imgs, syn_labels = make_dataset_with_two_channels_kmeans(c1, c2, labels)
-	
-	# combine the two
-	imgs = np.concatenate((syn_imgs, bme_imgs), axis=0)
-	labels = np.concatenate((syn_labels, bme_labels), axis=0)
-
-	# shuffle the dataset
-	print("shuffling")
-	print(imgs.shape)
-	print(labels.shape)
-	p = np.random.permutation(imgs.shape[0])
-	imgs = imgs[p]
-	labels = labels[p]
-	print("done shuffling")
-
-
-	print(imgs.dtype)
-	print(labels.dtype)
-	print(imgs.shape)
-	print(labels.shape)
-
-	imgs1 = imgs[:100000,:,:,:,:]
-	imgs2 = imgs[100000:200000,:,:,:,:]
-	imgs3 = imgs[200000:300000,:,:,:,:]
-	imgs4 = imgs[300000:400000,:,:,:,:]
-	imgs5 = imgs[400000:,:,:,:,:]
-	#imgs6 = imgs[500000:,:,:,:,:]
-	
-	labels1 = labels[:100000]
-	labels2 = labels[100000:200000]
-	labels3 = labels[200000:300000]
-	labels4 = labels[300000:400000]
-	labels5 = labels[400000:]
-	#labels6 = labels[500000:]	
-
-	npy_to_bin.flatten_and_bin(imgs1, labels1, '../../data/datasets/bins/train_and_label_regfix_batch_1.bin')
-	npy_to_bin.flatten_and_bin(imgs2, labels2, '../../data/datasets/bins/train_and_label_regfix_batch_2.bin')
-	npy_to_bin.flatten_and_bin(imgs3, labels3, '../../data/datasets/bins/train_and_label_regfix_batch_3.bin')
-	npy_to_bin.flatten_and_bin(imgs4, labels4, '../../data/datasets/bins/train_and_label_regfix_batch_4.bin')
-	npy_to_bin.flatten_and_bin(imgs5, labels5, '../../data/datasets/bins/train_and_label_regfix_batch_5.bin')
-	#npy_to_bin.flatten_and_bin(imgs6, labels6, '../../data/datasets/bins/train_and_label_bmet1postreg_batch_6.bin')
-	
-
-	#np.save('../../data/datasets/train_2ch_big', np.array(train))
-	#np.save('../../data/datasets/train_labels_2ch_big', np.array(train_labels))
+    return train, train_labels
 
 def make_fc_t1dataset():
 
@@ -618,8 +312,73 @@ def make_fc_fullimg_bme_dataset():
     npy_to_bin_fullconv.flatten_and_bin(imgs3, labels3, '../../../../data/datasets/bins/train_and_label_fullimg_bme_batch_3.bin')
     npy_to_bin_fullconv.flatten_and_bin(imgs4, labels4, '../../../../data/datasets/bins/train_and_label_fullimg_bme_batch_4.bin')
 
+def make_fc_bme256_dataset():
+
+    # load images and labels
+    images_and_labels = np.load('../../../../data/datasets/t2imgs_and_prereg_labels.npy')
+    
+    # validation set
+    ids = np.arange(7,31)
+    images_and_labels = images_and_labels[ids,:,:,:,:]
+    
+    # assert that we left out a validation set
+    assert images_and_labels.shape[0] == 24
+    
+    # make synovitis patches and bme patches
+    c1, labels = images_and_labels[:,0,:,:,:], images_and_labels[:,1,:,:,:]
+    imgs, labels = make_dataset_with_one_channel(c1, labels)
+    
+    print(imgs.dtype)
+    print(labels.dtype)
+    print(imgs.shape)
+    print(labels.shape)
+    
+    imgs1 = imgs[:300,:,:,:,:]
+    imgs2 = imgs[300:600,:,:,:,:]
+    imgs3 = imgs[600:900,:,:,:,:]
+    imgs4 = imgs[900:,:,:,:,:]
+    
+    labels1 = labels[:300,:,:,:]
+    labels2 = labels[300:600,:,:,:]
+    labels3 = labels[600:900,:,:,:]
+    labels4 = labels[900:,:,:,:]
+    
+    npy_to_bin_fullconv.flatten_and_bin(imgs1, labels1, '../../../../data/datasets/bins/train_and_label_fullconv_bme256_batch_1.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs2, labels2, '../../../../data/datasets/bins/train_and_label_fullconv_bme256_batch_2.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs3, labels3, '../../../../data/datasets/bins/train_and_label_fullconv_bme256_batch_3.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs4, labels4, '../../../../data/datasets/bins/train_and_label_fullconv_bme256_batch_4.bin')
+
+def make_fc_bme256_valset():
+
+    # load images and labels
+    images_and_labels = np.load('../../../../data/datasets/t2imgs_and_prereg_labels.npy')
+    
+    # validation set
+    ids = np.arange(0,7)
+    images_and_labels = images_and_labels[ids,:,:,:,:]
+    
+    # assert that we left out a validation set
+    assert images_and_labels.shape[0] == 7
+    
+    # make synovitis patches and bme patches
+    c1, labels = images_and_labels[:,0,:,:,:], images_and_labels[:,1,:,:,:]
+    imgs, labels = make_dataset_with_one_channel(c1, labels)
+    
+    print(imgs.dtype)
+    print(labels.dtype)
+    print(imgs.shape)
+    print(labels.shape)
+    
+    imgs1 = imgs[:175,:,:,:,:]
+    imgs2 = imgs[175:,:,:,:,:]
+    
+    labels1 = labels[:175,:,:,:]
+    labels2 = labels[175:,:,:,:]
+    
+    npy_to_bin_fullconv.flatten_and_bin(imgs1, labels1, '../../../../data/datasets/bins/val_and_label_fullconv_bme256_batch_1.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs2, labels2, '../../../../data/datasets/bins/val_and_label_fullconv_bme256_batch_2.bin')
 
 if __name__ == '__main__':
 
-    make_fc_fullimg_bme_dataset()
+    make_fc_bme256_valset()
 	

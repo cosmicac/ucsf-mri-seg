@@ -8,7 +8,7 @@ import raseg_input
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_boolean('use_fp16', False, """Train model using 16-bit floating point.""")
 tf.app.flags.DEFINE_string('data_dir', '../../../data/datasets/bins', """Directory to the data binaries""")
-tf.app.flags.DEFINE_integer('batch_size', 1, """Number of voxel regions in our batch.""")
+tf.app.flags.DEFINE_integer('batch_size', 2, """Number of voxel regions in our batch.""")
 
 # constants
 NCHANNELS = raseg_input.NCHANNELS
@@ -16,9 +16,9 @@ NUM_CLASSES = raseg_input.NUM_CLASSES
 NUM_EXAMPLES_EPOCH_TRAIN = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_EPOCH_EVAL = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 MOVING_AVERAGE_DECAY = 0.9999
-NUM_EPOCHS_PER_DECAY = 6
-LEARNING_RATE_DECAY_FACTOR = 0.25
-INITIAL_LEARNING_RATE = 0.00001
+NUM_EPOCHS_PER_DECAY = 5
+LEARNING_RATE_DECAY_FACTOR = 0.15
+INITIAL_LEARNING_RATE = 0.0001
 
 
 def variable_on_cpu(name, shape, initializer):

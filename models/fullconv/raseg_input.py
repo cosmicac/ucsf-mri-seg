@@ -4,13 +4,13 @@ from six.moves import xrange
 import tensorflow as tf
 import numpy as np
 
-PATCH_HEIGHT = 512
-PATCH_WIDTH = 512
+PATCH_HEIGHT = 256
+PATCH_WIDTH = 256
 PATCH_DEPTH = 20
 NCHANNELS = 1
 
 NUM_CLASSES = 2
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 24
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 1200
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 7
 
 def read_train_bin(filename_queue):
@@ -49,7 +49,7 @@ def read_train_bin(filename_queue):
   record_bytes = label_bytes + image_bytes
 
   # should be 512*512*20*2*2 + 512*512*20*2
-  assert record_bytes == 20971520
+  assert record_bytes == 5242880
 
   # Read a record, getting filenames from the filename_queue.  No
   # header or footer in the format, so we leave header_bytes
@@ -189,7 +189,7 @@ def distorted_inputs(data_dir, batch_size):
     images: Images. 5D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH, NCHANNELS] size.
     labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.
   """
-  filenames = [os.path.join(data_dir, 'train_and_label_fullimg_bme_batch_{0}.bin'.format(i))
+  filenames = [os.path.join(data_dir, 'train_and_label_fullconv_bme256_batch_{0}.bin'.format(i))
                  for i in xrange(1, 5)]
 
   for f in filenames:
@@ -229,5 +229,5 @@ def distorted_inputs(data_dir, batch_size):
   # Generate a batch of images and labels by building up a queue of examples.
   return _generate_image_and_label_batch(float_image, label,
                                          min_queue_examples, batch_size,
-                                         shuffle=False)
+                                         shuffle=True)
  
