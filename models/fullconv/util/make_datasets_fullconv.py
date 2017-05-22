@@ -380,5 +380,5 @@ def make_fc_bme256_valset():
 
 if __name__ == '__main__':
 
-    make_fc_bme256_valset()
+    make_fc_bme256_dataset()
 	
