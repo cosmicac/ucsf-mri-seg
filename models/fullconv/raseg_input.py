@@ -170,7 +170,7 @@ def distort_image(image, labels):
     M = cv2.getAffineTransform(pts1, pts2)
     distort = np.random.randint(5)
 
-    if (distort == 0):
+    if (distort == -1):
         # Loop through each depth and apply the affine transformation
         for i in range(PATCH_DEPTH):
             image[:,:,i,0] = cv2.warpAffine(image[:,:,i,0], M, (PATCH_WIDTH, PATCH_HEIGHT))

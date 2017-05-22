@@ -16,9 +16,9 @@ NUM_CLASSES = raseg_input.NUM_CLASSES
 NUM_EXAMPLES_EPOCH_TRAIN = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_EPOCH_EVAL = raseg_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 MOVING_AVERAGE_DECAY = 0.9999
-NUM_EPOCHS_PER_DECAY = 8
-LEARNING_RATE_DECAY_FACTOR = 0.15
-INITIAL_LEARNING_RATE = 0.001
+NUM_EPOCHS_PER_DECAY = 6
+LEARNING_RATE_DECAY_FACTOR = 0.25
+INITIAL_LEARNING_RATE = 0.00001
 
 
 def variable_on_cpu(name, shape, initializer):
@@ -99,6 +99,7 @@ def dice_coeff_loss(logits, labels):
 
     preds_sum = tf.reduce_sum(softmax_non_healthy, axis=[1,2,3], name='preds_sum')
     preds_sum = tf.Print(preds_sum, [preds_sum], message='Preds: ')
+    #preds_sum = tf.multiply(preds_sum, 3)
     print("Preds sum shape: {0}".format(preds_sum.get_shape()))
 
     labels_sum = tf.reduce_sum(labels, axis=[1,2,3], name='labels_sum')
@@ -117,8 +118,6 @@ def dice_coeff_loss(logits, labels):
     denominator = tf.add(tf.add(preds_sum, labels_sum), stability)
     #denominator = tf.Print(denominator, [denominator], message='Denominator: ')
     dice_coeff = tf.truediv(numerator, denominator, name='dice_coeff_per_sample')
-    #dice_coeff = tf.to_float(tf.truediv(tf.add(tf.multiply(intersection, 2), smoothing), 
-    #                        tf.add(tf.add(preds_sum, labels_sum), smoothing), name='dice_coeff_per_sample'))
     print("Dice coeff shape: {0}".format(dice_coeff.get_shape()))
 
     # average dice coefficient for batch
