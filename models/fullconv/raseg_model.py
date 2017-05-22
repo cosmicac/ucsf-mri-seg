@@ -203,8 +203,8 @@ def inputs(eval_data):
   return images, labels
 
 def batch_norm(batch, n_channels):
-    beta = variable_on_cpu('beta', shape=[n_channels], tf.constant_initializer(0.0))
-    gamma = variable_on_cpu('gamma', shape=[n_channels], tf.constant_initializer(1.0))
+    beta = variable_on_cpu('beta', [n_channels], tf.constant_initializer(0.0))
+    gamma = variable_on_cpu('gamma', [n_channels], tf.constant_initializer(1.0))
     mean, var = tf.nn.moments(batch, axes=[0,1,2,3])
     batch = tf.nn.batch_normalization(batch, mean, var, beta, gamma, 1e-05)
     return batch
