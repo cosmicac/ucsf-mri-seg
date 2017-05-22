@@ -8,7 +8,7 @@ import raseg_input
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_boolean('use_fp16', False, """Train model using 16-bit floating point.""")
 tf.app.flags.DEFINE_string('data_dir', '../../../data/datasets/bins', """Directory to the data binaries""")
-tf.app.flags.DEFINE_integer('batch_size', 2, """Number of voxel regions in our batch.""")
+tf.app.flags.DEFINE_integer('batch_size', 1, """Number of voxel regions in our batch.""")
 
 # constants
 NCHANNELS = raseg_input.NCHANNELS
