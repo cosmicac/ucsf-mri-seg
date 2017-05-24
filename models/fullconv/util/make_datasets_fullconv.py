@@ -6,7 +6,7 @@ import time
 import npy_to_bin_fullconv
 from sklearn.cluster import KMeans
 
-NUM_SAMPLE_TRAIN = 1200
+NUM_SAMPLE_TRAIN = 600
 NUM_SAMPLE_TEST = 40000
 PATCH_SIZE = (256, 256, 20)
 PATCH_MARGINS = (int(PATCH_SIZE[0]/2), int(PATCH_SIZE[1]/2), int(PATCH_SIZE[2]/2))
@@ -170,8 +170,7 @@ def make_dataset_with_one_channel_labsprop(c1, labs):
     for i in range(n):
 
         # generate random label and center based on radom label
-        #center_labs = np.random.randint(2, size=int(NUM_SAMPLE_TRAIN/n))
-	center_labs = np.random.binomial(1, 0.9, size=int(NUM_SAMPLE_TRAIN/n))
+        center_labs = np.random.binomial(1, 0.9, size=int(NUM_SAMPLE_TRAIN/n))
         centers = sample_centers(labs[i], center_labs)
         
         # extract patches for each center
@@ -369,27 +368,27 @@ def make_fc_bme256_dataset():
     
     # make synovitis patches and bme patches
     c1, labels = images_and_labels[:,0,:,:,:], images_and_labels[:,1,:,:,:]
-    imgs, labels = make_dataset_with_one_channel(c1, labels)
+    imgs, labels = make_dataset_with_one_channel_labsprop(c1, labels)
     
     print(imgs.dtype)
     print(labels.dtype)
     print(imgs.shape)
     print(labels.shape)
     
-    imgs1 = imgs[:300,:,:,:,:]
-    imgs2 = imgs[300:600,:,:,:,:]
-    imgs3 = imgs[600:900,:,:,:,:]
-    imgs4 = imgs[900:,:,:,:,:]
+    imgs1 = imgs[:150,:,:,:,:]
+    imgs2 = imgs[150:300,:,:,:,:]
+    imgs3 = imgs[300:450,:,:,:,:]
+    imgs4 = imgs[450:,:,:,:,:]
     
-    labels1 = labels[:300,:,:,:]
-    labels2 = labels[300:600,:,:,:]
-    labels3 = labels[600:900,:,:,:]
-    labels4 = labels[900:,:,:,:]
+    labels1 = labels[:150,:,:,:]
+    labels2 = labels[150:300,:,:,:]
+    labels3 = labels[300:450,:,:,:]
+    labels4 = labels[450:,:,:,:]
     
-    npy_to_bin_fullconv.flatten_and_bin(imgs1, labels1, '../../../../data/datasets/bins/train_and_label_fullconv_bme256_batch_1.bin')
-    npy_to_bin_fullconv.flatten_and_bin(imgs2, labels2, '../../../../data/datasets/bins/train_and_label_fullconv_bme256_batch_2.bin')
-    npy_to_bin_fullconv.flatten_and_bin(imgs3, labels3, '../../../../data/datasets/bins/train_and_label_fullconv_bme256_batch_3.bin')
-    npy_to_bin_fullconv.flatten_and_bin(imgs4, labels4, '../../../../data/datasets/bins/train_and_label_fullconv_bme256_batch_4.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs1, labels1, '../../../../data/datasets/bins/train_and_label_bme_labsprop_batch_1.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs2, labels2, '../../../../data/datasets/bins/train_and_label_bme_labsprop_batch_2.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs3, labels3, '../../../../data/datasets/bins/train_and_label_bme_labsprop_batch_3.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs4, labels4, '../../../../data/datasets/bins/train_and_label_bme_labsprop_batch_4.bin')
 
 def make_fc_bme256_valset():
 

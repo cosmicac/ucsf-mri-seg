@@ -5,7 +5,7 @@ import raseg_model
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('train_dir', '../../../models/raseg_train_fullconv_bme256',
+tf.app.flags.DEFINE_string('train_dir', '../../../models/raseg_train_bme_labsprop',
                            """Directory where to write event logs """
                            """and checkpoint.""")
 tf.app.flags.DEFINE_integer('max_steps', 1000000,
@@ -65,7 +65,7 @@ def train():
     #config.gpu_options.allow_growth = True
 
     ckpt_saver = tf.train.Saver(max_to_keep=20)
-    ckpt_hook = tf.train.CheckpointSaverHook(FLAGS.train_dir, save_steps = 30, saver=ckpt_saver)
+    ckpt_hook = tf.train.CheckpointSaverHook(FLAGS.train_dir, save_steps = 150, saver=ckpt_saver)
     with tf.train.MonitoredTrainingSession(
         checkpoint_dir=FLAGS.train_dir,
         hooks=[tf.train.StopAtStepHook(last_step=FLAGS.max_steps),
