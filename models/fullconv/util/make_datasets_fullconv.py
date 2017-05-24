@@ -159,6 +159,49 @@ def make_dataset_with_one_channel(c1, labs):
 	
     return train, train_labels
 
+def make_dataset_with_one_channel_labsprop(c1, labs):
+
+    n = c1.shape[0]
+    
+    train = np.empty((NUM_SAMPLE_TRAIN, PATCH_SIZE[0], PATCH_SIZE[1], PATCH_SIZE[2], 1), dtype='uint16') 
+    train_labels = np.empty((NUM_SAMPLE_TRAIN,PATCH_SIZE[0],PATCH_SIZE[1],PATCH_SIZE[2]), dtype='uint16')
+    
+    count = 0
+    for i in range(n):
+
+        # generate random label and center based on radom label
+        #center_labs = np.random.randint(2, size=int(NUM_SAMPLE_TRAIN/n))
+	center_labs = np.random.binomial(1, 0.9, size=int(NUM_SAMPLE_TRAIN/n))
+        centers = sample_centers(labs[i], center_labs)
+        
+        # extract patches for each center
+        for c in centers:
+
+            if count % 200 == 0:
+                print('extracting example {0}'.format(count))
+
+            # extract patches from channels
+            c1patch = extract_patch(c1[i], c).reshape((PATCH_SIZE[0],PATCH_SIZE[1],PATCH_SIZE[2],1))
+            lab_patch = extract_patch(labs[i], c)
+
+            # append to datasets
+            train[count,:,:,:,:] = c1patch
+            train_labels[count,:,:,:] = lab_patch
+
+	    # increment counter
+            count += 1
+
+    # make into np arrays
+    train , train_labels = np.array(train).astype('uint16'), np.array(train_labels).astype('uint16')
+
+    # shuffle 
+    p = np.random.permutation(NUM_SAMPLE_TRAIN)
+    train = train[p]
+    train_labels = train_labels[p]
+	
+    return train, train_labels
+
+
 def make_fc_t1dataset():
 
     # load images and labels

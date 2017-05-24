@@ -203,12 +203,12 @@ def dsc(pred_labs, labs):
 if __name__ == '__main__':
 
     # load all images and labels
-    iml = np.load('../../../../data/datasets/images_and_labels.npy')
+    iml = np.load('../../../../data/datasets/t2imgs_and_prereg_labels.npy')
     #imgn = 1
-    tag = 'fullimg_4_571'
-    for imgn in range(8):
+    tag = 'fullconv_bme256_3900'
+    for imgn in range(7):
         mask = load_preds(imgn, tag)
-        save_true_and_mask(iml, imgn, mask, tag)
+        #save_true_and_mask(iml, imgn, mask, tag)
         print(dsc(mask, iml[imgn,1,:,:,:])) 
 
     #labels = np.load('labs_test.npy').astype(np.float32)

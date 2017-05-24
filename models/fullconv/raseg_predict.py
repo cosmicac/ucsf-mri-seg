@@ -6,16 +6,16 @@ import numpy as np
 import tensorflow as tf
 import raseg_model
 import raseg_input
-import util.make_datasets as md
+import util.make_datasets_fullconv as md
 
 FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string('eval_dir', '../../../models/raseg_predict',
                            """Directory where to write event logs.""")
-tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_fullimg_4',
+tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_fullconv_bme256',
                            """Directory where to read model checkpoints.""")
 tf.app.flags.DEFINE_integer('imgn', 0, """Image number to evaluate.""")
-tf.app.flags.DEFINE_string('savetag', 'fullimg_4_331', """Tag to save predictions as. """)
+tf.app.flags.DEFINE_string('savetag', 'fullconv_bme256_3900', """Tag to save predictions as. """)
 
 """Assumes image is of dimensions [height, width, depth, nchannels]"""
 def normalize(image):
@@ -29,15 +29,13 @@ def normalize(image):
 def predict():
 
   # load images, both channels
-  images_and_labels = np.load('../../../data/datasets/images_and_labels.npy')
-  pre_images = np.load('../../../data/datasets/pre_images.npy')
+  images_and_labels = np.load('../../../data/datasets/t2imgs_and_prereg_labels.npy')
 
   img = images_and_labels[FLAGS.imgn,0,:,:,:]
-  pre_img = pre_images[FLAGS.imgn,:,:,:]
   labs = images_and_labels[FLAGS.imgn,1,:,:,:]
 
   # Indexes for the 32 patches to predict
-  patches = np.zeros((4,256,256,20,1)), dtype=np.float32)
+  patches = np.zeros((4,256,256,20,1), dtype=np.float32)
   depth_idx = [10]
   hw_idx = [128, 384]
 
@@ -52,10 +50,10 @@ def predict():
   # Normalize patches and make batches. 
   for i in range(patches.shape[0]):
     patches[i,:,:,:,:] = normalize(patches[i,:,:,:,:])
-  batches = [patches[0,:,:,:,:], patches[1,:,:,:,:], patches[2,:,:,:,:], patches[3,:,:,:,:]]  
+  batches = [patches[0:2,:,:,:,:], patches[2:4,:,:,:,:]]  
   preds = np.zeros((4,256,256,20))
 
- with tf.Graph().as_default() as g:
+  with tf.Graph().as_default() as g:
 
     # Build graph and prediction operation.
     images = tf.placeholder(tf.float32, shape=(FLAGS.batch_size,raseg_input.PATCH_WIDTH,raseg_input.PATCH_WIDTH, raseg_input.PATCH_DEPTH,raseg_input.NCHANNELS))
