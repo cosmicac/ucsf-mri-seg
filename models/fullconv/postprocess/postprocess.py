@@ -13,7 +13,7 @@ def load_preds(i, tag):
 def overlay_mask_and_save(img, mask, filename):
     plt.imshow(img, cmap='bone')
     plt.imshow(mask, cmap='brg', interpolation='None', alpha=0.2)
-    plt.savefig(filename, format='png')
+    plt.savefig("{0}.png".format(filename), format='png')
 
 def postprocess(img):
     opened = ndimage.binary_opening(img)
@@ -219,7 +219,7 @@ if __name__ == '__main__':
     make_dir_if_needed(directory)
     for imgn in range(24,31):
         mask = load_preds(imgn, tag)
-        save_true_and_mask(iml, imgn, mask, tag)
+        #save_true_and_mask(iml, imgn, mask, tag)
         print(dsc(mask, iml[imgn,1,:,:,:])) 
 
     #labels = np.load('labs_test.npy').astype(np.float32)
