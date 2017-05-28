@@ -1,4 +1,5 @@
 import math
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage
@@ -45,12 +46,21 @@ def save_pre_post_given_mask(iml, i, mask, savetag):
     overlay_mask_and_save(img, mask, '../../pictures/img{0}d{1}_{2}_seg_pre'.format(i,d,savetag))
     overlay_mask_and_save(img, mask_post, '../../pictures/img{0}d{1}_{2}_seg_post'.format(i,d,savetag))
 
+def make_dir_if_needed(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
 def save_true_and_mask(iml, i, mask, savetag):
         img, img_labels = get_img_and_labels(iml, i)
+        
+        # Create directory to save pictures in if neccessary.
+        directory = '../../../../pictures/{0}/img{1}'.format(savetag, i)
+        make_dir_if_needed(directory)
 
         for d in range(20):
             if (d % 5 == 0):
               print(d)
+
             overlay_mask_and_save(img[:,:,d], img_labels[:,:,d], '../../../../pictures/{0}/img{1}/img{2}d{3}_{4}_true'.format(savetag, i, i, d, savetag))
             overlay_mask_and_save(img[:,:,d], mask[:,:,d], '../../../../pictures/{0}/img{1}/img{2}d{3}_{4}_pred'.format(savetag, i, i, d, savetag))
 
@@ -204,11 +214,12 @@ if __name__ == '__main__':
 
     # load all images and labels
     iml = np.load('../../../../data/datasets/t2imgs_and_prereg_labels.npy')
-    #imgn = 1
-    tag = 'fullconv_bme256_3900'
-    for imgn in range(7):
+    tag = 'bme_center_stitch_1801'
+    directory = '../../../../pictures/{0}'.format(tag)
+    make_dir_if_needed(directory)
+    for imgn in range(24,31):
         mask = load_preds(imgn, tag)
-        #save_true_and_mask(iml, imgn, mask, tag)
+        save_true_and_mask(iml, imgn, mask, tag)
         print(dsc(mask, iml[imgn,1,:,:,:])) 
 
     #labels = np.load('labs_test.npy').astype(np.float32)

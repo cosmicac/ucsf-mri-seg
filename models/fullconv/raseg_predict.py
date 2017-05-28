@@ -2,6 +2,7 @@ from __future__ import division
 from datetime import datetime
 import math
 import time
+import os
 import numpy as np
 import tensorflow as tf
 import raseg_model
@@ -12,10 +13,10 @@ FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string('eval_dir', '../../../models/raseg_predict',
                            """Directory where to write event logs.""")
-tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_fullconv_bme256',
+tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_bme_center',
                            """Directory where to read model checkpoints.""")
 tf.app.flags.DEFINE_integer('imgn', 0, """Image number to evaluate.""")
-tf.app.flags.DEFINE_string('savetag', 'fullconv_bme256_3900', """Tag to save predictions as. """)
+tf.app.flags.DEFINE_string('savetag', 'bme_center_stitch_1801', """Tag to save predictions as. """)
 
 """Assumes image is of dimensions [height, width, depth, nchannels]"""
 def normalize(image):
@@ -95,6 +96,11 @@ def predict():
         final_mask[h-128:h+128,w-128:w+128,d-10:d+10] = preds[c]
         c += 1
 
+  # Make directory to save predictions in if neccessary.
+  directory = '../../../preds/{0}'.format(FLAGS.savetag)
+  if not os.path.exists(directory):
+    os.makedirs(directory)
+  
   # Save the mask.
   np.save('../../../preds/{0}/img{1}_{2}'.format(FLAGS.savetag, FLAGS.imgn, FLAGS.savetag), final_mask)
 

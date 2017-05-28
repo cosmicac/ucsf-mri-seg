@@ -404,7 +404,7 @@ def make_fc_bme256_dataset():
     images_and_labels = np.load('../../../../data/datasets/t2imgs_and_prereg_labels.npy')
     
     # validation set
-    ids = np.arange(7,31)
+    ids = np.arange(0,24)
     images_and_labels = images_and_labels[ids,:,:,:,:]
     
     # assert that we left out a validation set

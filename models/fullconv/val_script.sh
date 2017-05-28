@@ -1,5 +1,5 @@
 #!/bin/bash
-#for i in $(seq 0 7);
+#for i in $(seq 24 30);
 #do
 #  python raseg_predict.py --imgn=$i
 #done
