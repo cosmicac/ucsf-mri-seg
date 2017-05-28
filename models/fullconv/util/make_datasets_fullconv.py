@@ -1,5 +1,4 @@
 import numpy as np 
-import scipy.io as sio
 import os.path
 import time
 #import util.npy_to_bin as npy_to_bin
@@ -77,7 +76,7 @@ def sample_centers_uniform_within_range(n_centers, x_range, y_range, z_range):
     x_idx = np.random.randint(x_range[0], x_range[1], size=n_centers)
     y_idx = np.random.randint(y_range[0], y_range[1], size=n_centers)
     z_idx = np.random.randint(z_range[0], z_range[1], size=n_centers)
-    return zip(tx, ty, tz)
+    return zip(x_idx, y_idx, z_idx)
 
 def make_dataset_with_two_channels(c1, c2, labs):
 
@@ -193,7 +192,7 @@ def make_dataset_with_one_channel_labsprop(c1, labs):
             train[count,:,:,:,:] = c1patch
             train_labels[count,:,:,:] = lab_patch
 
-	    # increment counter
+            # increment counter
             count += 1
 
     # make into np arrays
@@ -203,7 +202,7 @@ def make_dataset_with_one_channel_labsprop(c1, labs):
     p = np.random.permutation(NUM_SAMPLE_TRAIN)
     train = train[p]
     train_labels = train_labels[p]
-	
+
     return train, train_labels
 
 def make_dataset_with_one_channel_center(c1, labs):
@@ -217,9 +216,7 @@ def make_dataset_with_one_channel_center(c1, labs):
     for i in range(n):
 
         # generate random label and center based on radom label
-        center_labs = np.random.binomial(1, 0.9, size=int(NUM_SAMPLE_TRAIN/n))
-        centers = sample_centers(labs[i], center_labs)
-        centers = sample_centers_uniform_within_range(int(NUM_SAMPLE_TRAIN/n), (226, 286), (226, 286), (10,10))
+        centers = sample_centers_uniform_within_range(int(NUM_SAMPLE_TRAIN/n), (226, 286), (226, 286), (10,11))
         
         # extract patches for each center
         for c in centers:
@@ -235,7 +232,7 @@ def make_dataset_with_one_channel_center(c1, labs):
             train[count,:,:,:,:] = c1patch
             train_labels[count,:,:,:] = lab_patch
 
-	    # increment counter
+            # increment counter
             count += 1
 
     # make into np arrays
@@ -245,7 +242,7 @@ def make_dataset_with_one_channel_center(c1, labs):
     p = np.random.permutation(NUM_SAMPLE_TRAIN)
     train = train[p]
     train_labels = train_labels[p]
-	
+
     return train, train_labels
 
 def make_fc_t1dataset():
@@ -415,7 +412,7 @@ def make_fc_bme256_dataset():
     
     # make synovitis patches and bme patches
     c1, labels = images_and_labels[:,0,:,:,:], images_and_labels[:,1,:,:,:]
-    imgs, labels = make_dataset_with_one_channel_labsprop(c1, labels)
+    imgs, labels = make_dataset_with_one_channel_center(c1, labels)
     
     print(imgs.dtype)
     print(labels.dtype)
@@ -432,10 +429,10 @@ def make_fc_bme256_dataset():
     labels3 = labels[300:450,:,:,:]
     labels4 = labels[450:,:,:,:]
     
-    npy_to_bin_fullconv.flatten_and_bin(imgs1, labels1, '../../../../data/datasets/bins/train_and_label_bme_labsprop_batch_1.bin')
-    npy_to_bin_fullconv.flatten_and_bin(imgs2, labels2, '../../../../data/datasets/bins/train_and_label_bme_labsprop_batch_2.bin')
-    npy_to_bin_fullconv.flatten_and_bin(imgs3, labels3, '../../../../data/datasets/bins/train_and_label_bme_labsprop_batch_3.bin')
-    npy_to_bin_fullconv.flatten_and_bin(imgs4, labels4, '../../../../data/datasets/bins/train_and_label_bme_labsprop_batch_4.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs1, labels1, '../../../../data/datasets/bins/train_and_label_bme_center_batch_1.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs2, labels2, '../../../../data/datasets/bins/train_and_label_bme_center_batch_2.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs3, labels3, '../../../../data/datasets/bins/train_and_label_bme_center_batch_3.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs4, labels4, '../../../../data/datasets/bins/train_and_label_bme_center_batch_4.bin')
 
 def make_fc_bme256_valset():
 
