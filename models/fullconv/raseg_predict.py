@@ -35,24 +35,30 @@ def predict():
   img = images_and_labels[FLAGS.imgn,0,:,:,:]
   labs = images_and_labels[FLAGS.imgn,1,:,:,:]
 
-  # Indexes for the 32 patches to predict
-  patches = np.zeros((4,256,256,20,1), dtype=np.float32)
-  depth_idx = [10]
-  hw_idx = [128, 384]
+  ## Indexes for the 32 patches to predict
+  #patches = np.zeros((4,256,256,20,1), dtype=np.float32)
+  #depth_idx = [10]
+  #hw_idx = [128, 384]
 
-  # extract patches for classification
-  k = 0
-  for d in depth_idx:
-    for h in hw_idx:
-      for w in hw_idx:
-        patches[k,:,:,:,0] = md.extract_patch(img, (h,w,d)).astype(np.float32)
-        k += 1
+  ## extract patches for classification
+  #k = 0
+  #for d in depth_idx:
+  #  for h in hw_idx:
+  #    for w in hw_idx:
+  #      patches[k,:,:,:,0] = md.extract_patch(img, (h,w,d)).astype(np.float32)
+  #      k += 1
 
-  # Normalize patches and make batches. 
-  for i in range(patches.shape[0]):
-    patches[i,:,:,:,:] = normalize(patches[i,:,:,:,:])
-  batches = [patches[0:2,:,:,:,:], patches[2:4,:,:,:,:]]  
-  preds = np.zeros((4,256,256,20))
+  ## Normalize patches and make batches. 
+  #for i in range(patches.shape[0]):
+  #  patches[i,:,:,:,:] = normalize(patches[i,:,:,:,:])
+  #batches = [patches[0:2,:,:,:,:], patches[2:4,:,:,:,:]]  
+  #preds = np.zeros((4,256,256,20))
+
+  patches = np.zeros((1,256,256,20,1), dtype=np.float32)
+  patches[0,:,:,:,0] = md.extract_patch(img, (256,256,10)).astype(np.float32)
+  patches[0,:,:,:,:] = normalize(patches[0,:,:,:,:]
+  batches = [patches]
+  preds = np.zeros((1,256,256,20))
 
   with tf.Graph().as_default() as g:
 
@@ -87,14 +93,16 @@ def predict():
         preds[FLAGS.batch_size*c:FLAGS.batch_size*(c+1),:,:,:] = preds_batch
         c += 1
                 
-  # Stitch together for the final mask. 
+  ## Stitch together for the final mask. 
+  #final_mask = np.zeros((512,512,20))
+  #c = 0
+  #for d in depth_idx:
+  #  for h in hw_idx:
+  #    for w in hw_idx:
+  #      final_mask[h-128:h+128,w-128:w+128,d-10:d+10] = preds[c]
+  #      c += 1
   final_mask = np.zeros((512,512,20))
-  c = 0
-  for d in depth_idx:
-    for h in hw_idx:
-      for w in hw_idx:
-        final_mask[h-128:h+128,w-128:w+128,d-10:d+10] = preds[c]
-        c += 1
+  final_mask[128:384,128:384,:] = preds[0]
 
   # Make directory to save predictions in if neccessary.
   directory = '../../../preds/{0}'.format(FLAGS.savetag)
