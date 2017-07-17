@@ -618,8 +618,54 @@ def make_fc_fullimg_bme_dataset():
     npy_to_bin_fullconv.flatten_and_bin(imgs3, labels3, '../../../../data/datasets/bins/train_and_label_fullimg_bme_batch_3.bin')
     npy_to_bin_fullconv.flatten_and_bin(imgs4, labels4, '../../../../data/datasets/bins/train_and_label_fullimg_bme_batch_4.bin')
 
+def make_fc_fullimg_expanded_dataset():
+
+    # load images and labels
+    images_and_labels = np.load('../../../../data/datasets/images_and_labels_expanded.npy')
+    pre_images = np.load('../../../../data/datasets/pre_images_expanded.npy')
+
+    assert pre_images.shape[0] == images_and_labels.shape[0]
+
+    # validation set
+    ids = np.arange(4,54)
+    images_and_labels = images_and_labels[ids,:,:,:,:]
+    pre_images = pre_images[ids,:,:,:]
+ 
+    # assert that we left out a validation set
+    assert images_and_labels.shape[0] == 50
+    assert pre_images.shape[0] == 50
+    assert pre_images.shape[0] == images_and_labels.shape[0]
+
+    c1, c2 = images_and_labels[:,0,:,:,:], pre_images
+    print(c1.shape)
+    print(c2.shape)
+    imgs = np.concatenate((c1[...,np.newaxis], c2[...,np.newaxis]), axis=4).astype('uint16')
+    labels = images_and_labels[:,1,:,:,:].astype('uint16')
+
+    print(imgs.shape)
+    print(labels.shape)
+    print(imgs.dtype)
+    print(labels.dtype)
+
+    imgs1 = imgs[:10,:,:,:,:]
+    imgs2 = imgs[10:20,:,:,:,:]
+    imgs3 = imgs[20:30,:,:,:,:]
+    imgs4 = imgs[30:40,:,:,:,:]
+    imgs5 = imgs[40:,:,:,:,:]
+    
+    labels1 = labels[:10,:,:,:]
+    labels2 = labels[10:20,:,:,:]
+    labels3 = labels[20:30,:,:,:]
+    labels4 = labels[30:40,:,:,:]
+    labels5 = labels[40:,:,:,:]
+    
+    npy_to_bin_fullconv.flatten_and_bin(imgs1, labels1, '../../../../data/datasets/bins/train_and_label_fullimg_expanded_batch_1.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs2, labels2, '../../../../data/datasets/bins/train_and_label_fullimg_expanded_batch_2.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs3, labels3, '../../../../data/datasets/bins/train_and_label_fullimg_expanded_batch_3.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs4, labels4, '../../../../data/datasets/bins/train_and_label_fullimg_expanded_batch_4.bin')
+    npy_to_bin_fullconv.flatten_and_bin(imgs5, labels5, '../../../../data/datasets/bins/train_and_label_fullimg_expanded_batch_5.bin')
 
 if __name__ == '__main__':
 
-    make_fc_fullimg_bme_dataset()
+    make_fc_fullimg_expanded_dataset()
 	

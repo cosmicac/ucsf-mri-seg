@@ -7,11 +7,11 @@ import numpy as np
 PATCH_HEIGHT = 512
 PATCH_WIDTH = 512
 PATCH_DEPTH = 20
-NCHANNELS = 1
+NCHANNELS = 2
 
 NUM_CLASSES = 2
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 24
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 7
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 50
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 11
 
 def read_train_bin(filename_queue):
   """Reads and parses patches from training data files.
@@ -49,7 +49,7 @@ def read_train_bin(filename_queue):
   record_bytes = label_bytes + image_bytes
 
   # should be 512*512*20*2*2 + 512*512*20*2
-  assert record_bytes == 20971520
+  assert record_bytes == 31457280
 
   # Read a record, getting filenames from the filename_queue.  No
   # header or footer in the format, so we leave header_bytes
@@ -117,8 +117,8 @@ def inputs(eval_data, data_dir, batch_size):
     labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.
   """
   if not eval_data:
-    filenames = [os.path.join(data_dir, 'train_and_label_fullconv_bme_batch_{0}.bin'.format(i))
-                 for i in xrange(1, 5)]
+    filenames = [os.path.join(data_dir, 'train_and_label_fullimg_expanded_batch_{0}.bin'.format(i))
+                 for i in xrange(1, 6)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
   else:
 
@@ -189,8 +189,8 @@ def distorted_inputs(data_dir, batch_size):
     images: Images. 5D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH, NCHANNELS] size.
     labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.
   """
-  filenames = [os.path.join(data_dir, 'train_and_label_fullimg_bme_batch_{0}.bin'.format(i))
-                 for i in xrange(1, 5)]
+  filenames = [os.path.join(data_dir, 'train_and_label_fullimg_expanded_batch_{0}.bin'.format(i))
+                 for i in xrange(1, 6)]
 
   for f in filenames:
     if not tf.gfile.Exists(f):
