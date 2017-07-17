@@ -214,12 +214,12 @@ if __name__ == '__main__':
 
     # load all images and labels
     iml = np.load('../../../../data/datasets/t2imgs_and_prereg_labels.npy')
-    tag = 'bme_center_stitch_1801'
+    tag = 'bme_center_1201'
     directory = '../../../../pictures/{0}'.format(tag)
     make_dir_if_needed(directory)
     for imgn in range(24,31):
         mask = load_preds(imgn, tag)
-        #save_true_and_mask(iml, imgn, mask, tag)
+        save_true_and_mask(iml, imgn, mask, tag)
         print(dsc(mask, iml[imgn,1,:,:,:])) 
 
     #labels = np.load('labs_test.npy').astype(np.float32)

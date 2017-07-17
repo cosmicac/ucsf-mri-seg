@@ -16,7 +16,7 @@ tf.app.flags.DEFINE_string('eval_dir', '../../../models/raseg_predict',
 tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_bme_center',
                            """Directory where to read model checkpoints.""")
 tf.app.flags.DEFINE_integer('imgn', 0, """Image number to evaluate.""")
-tf.app.flags.DEFINE_string('savetag', 'bme_center_stitch_1801', """Tag to save predictions as. """)
+tf.app.flags.DEFINE_string('savetag', 'bme_center_1201', """Tag to save predictions as. """)
 
 """Assumes image is of dimensions [height, width, depth, nchannels]"""
 def normalize(image):
@@ -56,9 +56,10 @@ def predict():
 
   patches = np.zeros((1,256,256,20,1), dtype=np.float32)
   patches[0,:,:,:,0] = md.extract_patch(img, (256,256,10)).astype(np.float32)
-  patches[0,:,:,:,:] = normalize(patches[0,:,:,:,:]
+  patches[0,:,:,:,:] = normalize(patches[0,:,:,:,:])
+  patches = np.concatenate((patches, patches), axis=0)
   batches = [patches]
-  preds = np.zeros((1,256,256,20))
+  preds = np.zeros((2,256,256,20))
 
   with tf.Graph().as_default() as g:
 
