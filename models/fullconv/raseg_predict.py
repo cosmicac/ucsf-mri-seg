@@ -12,10 +12,10 @@ FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string('eval_dir', '../../../models/raseg_predict',
                            """Directory where to write event logs.""")
-tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_fullimg_4',
+tf.app.flags.DEFINE_string('checkpoint_dir', '../../../models/raseg_train_fullimg_expanded',
                            """Directory where to read model checkpoints.""")
 tf.app.flags.DEFINE_integer('imgn', 0, """Image number to evaluate.""")
-tf.app.flags.DEFINE_string('savetag', 'fullimg_4_331', """Tag to save predictions as. """)
+tf.app.flags.DEFINE_string('savetag', 'fullimg_expanded', """Tag to save predictions as. """)
 
 """Assumes image is of dimensions [height, width, depth, nchannels]"""
 def normalize(image):
@@ -33,8 +33,8 @@ def normalize(image):
 def predict():
 
   # load images, both channels
-  images_and_labels = np.load('../../../data/datasets/images_and_labels.npy')
-  pre_images = np.load('../../../data/datasets/pre_images.npy')
+  images_and_labels = np.load('../../../data/datasets/images_and_labels_expanded.npy')
+  pre_images = np.load('../../../data/datasets/pre_images_expanded.npy')
 
   img = images_and_labels[FLAGS.imgn,0,:,:,:]
   pre_img = pre_images[FLAGS.imgn,:,:,:]

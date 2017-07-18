@@ -83,6 +83,7 @@ def dice_coeff_loss(logits, labels):
     
     # cast labels to floats
     labels = tf.to_float(labels)
+    #labels = tf.cast(labels, tf.float16)
 
     # softmax to get probabilities
     softmax = tf.nn.softmax(logits, dim=-1, name='softmax')
@@ -110,6 +111,7 @@ def dice_coeff_loss(logits, labels):
     
     # numerical stability
     stability = tf.constant(0.00001, dtype=tf.float32)
+    #stability = tf.constant(0.00001, dtype=tf.float16)
 
     # dice coeffs for every patch
     numerator = tf.multiply(intersection, 2)
@@ -125,7 +127,10 @@ def dice_coeff_loss(logits, labels):
 
     # loss is just negative dice coefficient
     dice_coeff_mean_loss = tf.negative(dice_coeff_mean, name='dice_coeff_loss')
-    tf.add_to_collection('losses', tf.to_float(dice_coeff_mean_loss))
+
+    # Cast as tf.float
+    dice_coeff_mean_loss = tf.cast(dice_coeff_mean_loss, tf.float32)
+    tf.add_to_collection('losses', dice_coeff_mean_loss)
     
     # add l2 loss and dice coefficient loss for total loss
     return tf.add_n(tf.get_collection('losses'), name='total_loss')
@@ -218,7 +223,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h0_conv1 = tf.nn.relu(sums, name=scope.name)
-        h0_conv1 = batch_norm(h0_conv1, 32)
+        #h0_conv1 = batch_norm(h0_conv1, 32)
    
     # height 0, convolution 2
     with tf.variable_scope('h0_conv2') as scope:
@@ -227,7 +232,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h0_conv2 = tf.nn.relu(sums, name=scope.name)
-        h0_conv2 = batch_norm(h0_conv2, 32)
+        #h0_conv2 = batch_norm(h0_conv2, 32)
 
     # downsampling from height 0 to height 1
     with tf.variable_scope('down1') as scope:
@@ -236,7 +241,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         down1 = tf.nn.relu(sums, name=scope.name)
-        down1 = batch_norm(down1, 32)
+        #down1 = batch_norm(down1, 32)
 
     # height 1, convolution 1
     with tf.variable_scope('h1_conv1') as scope:
@@ -245,7 +250,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h1_conv1 = tf.nn.relu(sums, name=scope.name)
-        h1_conv1 = batch_norm(h1_conv1, 64)
+        #h1_conv1 = batch_norm(h1_conv1, 64)
 
     # height 1, convolution 2
     with tf.variable_scope('h1_conv2') as scope:
@@ -254,7 +259,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h1_conv2 = tf.nn.relu(sums, name=scope.name)
-        h1_conv2 = batch_norm(h1_conv2, 64)
+        #h1_conv2 = batch_norm(h1_conv2, 64)
 
     # downsampling from height 1 to height 2
     with tf.variable_scope('down2') as scope:
@@ -263,7 +268,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         down2 = tf.nn.relu(sums, name=scope.name)
-        down2 = batch_norm(down2, 64)
+        #down2 = batch_norm(down2, 64)
 
     # height 2, convolution 1
     with tf.variable_scope('h2_conv1') as scope:
@@ -272,7 +277,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h2_conv1 = tf.nn.relu(sums, name=scope.name)
-        h2_conv1 = batch_norm(h2_conv1, 128)
+        #h2_conv1 = batch_norm(h2_conv1, 128)
 
     # height 2, convolution 2
     with tf.variable_scope('h2_conv2') as scope:
@@ -281,7 +286,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h2_conv2 = tf.nn.relu(sums, name=scope.name)
-        h2_conv2 = batch_norm(h2_conv2, 128)
+        #h2_conv2 = batch_norm(h2_conv2, 128)
 
     # downsampling from height 2 to height 3
     with tf.variable_scope('down3') as scope:
@@ -290,7 +295,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         down3 = tf.nn.relu(sums, name=scope.name)
-        down3 = batch_norm(down3, 128)
+        #down3 = batch_norm(down3, 128)
 
     # height 3, convolution 1
     with tf.variable_scope('h3_conv1') as scope:
@@ -299,7 +304,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h3_conv1 = tf.nn.relu(sums, name=scope.name)
-        h3_conv1 = batch_norm(h3_conv1, 256)
+        #h3_conv1 = batch_norm(h3_conv1, 256)
 
     # height 3, convolution 2
     with tf.variable_scope('h3_conv2') as scope:
@@ -308,7 +313,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h3_conv2 = tf.nn.relu(sums, name=scope.name)
-        h3_conv2 = batch_norm(h3_conv2, 256)
+        #h3_conv2 = batch_norm(h3_conv2, 256)
 
     # downsampling from height 3 to height 4
     with tf.variable_scope('down4') as scope:
@@ -317,7 +322,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         down4 = tf.nn.relu(sums, name=scope.name)
-        down4 = batch_norm(down4, 256)
+        #down4 = batch_norm(down4, 256)
 
     # height 4, convolution 1
     with tf.variable_scope('h4_conv1') as scope:
@@ -326,7 +331,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [512], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h4_conv1 = tf.nn.relu(sums, name=scope.name)
-        h4_conv1 = batch_norm(h4_conv1, 512)
+        #h4_conv1 = batch_norm(h4_conv1, 512)
 
     # height 4, convolution 2
     with tf.variable_scope('h4_conv2') as scope:
@@ -335,7 +340,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [512], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h4_conv2 = tf.nn.relu(sums, name=scope.name)
-        h4_conv2 = batch_norm(h4_conv2, 512)
+        #h4_conv2 = batch_norm(h4_conv2, 512)
 
     # upsampling from height 4 to height 3 and feed height 3 forward
     with tf.variable_scope('up1') as scope:
@@ -347,7 +352,7 @@ def inference(voxel_regions):
         up1 = tf.nn.relu(sums, name=scope.name)
         up1_concat = tf.concat_v2(values=[h3_conv2, up1], axis=4)
         #up1_concat = tf.concat(values=[h3_conv2, up1], concat_dim=4)
-        up1_concat = batch_norm(up1_concat, 512)
+        #up1_concat = batch_norm(up1_concat, 512)
  
     # height 3, convolution 3
     with tf.variable_scope('h3_conv3') as scope:
@@ -356,7 +361,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h3_conv3 = tf.nn.relu(sums, name=scope.name)
-        h3_conv3 = batch_norm(h3_conv3, 256)
+        #h3_conv3 = batch_norm(h3_conv3, 256)
 
     # height 3, convolution 4
     with tf.variable_scope('h3_conv4') as scope:
@@ -365,7 +370,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h3_conv4 = tf.nn.relu(sums, name=scope.name)
-        h3_conv4 = batch_norm(h3_conv4, 256)
+        #h3_conv4 = batch_norm(h3_conv4, 256)
 
     # upsampling from height 3 to height 2 and feed height 2 forward
     with tf.variable_scope('up2') as scope:
@@ -377,7 +382,7 @@ def inference(voxel_regions):
         up2 = tf.nn.relu(sums, name=scope.name)
         up2_concat = tf.concat_v2(values=[h2_conv2, up2], axis=4)
         #up2_concat = tf.concat(values=[h2_conv2, up2], concat_dim=4)
-        up2_concat = batch_norm(up2_concat, 256)
+        #up2_concat = batch_norm(up2_concat, 256)
 
     # height 2, convolution 3
     with tf.variable_scope('h2_conv3') as scope:
@@ -386,7 +391,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h2_conv3 = tf.nn.relu(sums, name=scope.name)
-        h2_conv3 = batch_norm(h2_conv3, 128)
+        #h2_conv3 = batch_norm(h2_conv3, 128)
 
     # height 2, convolution 4
     with tf.variable_scope('h2_conv4') as scope:
@@ -395,7 +400,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h2_conv4 = tf.nn.relu(sums, name=scope.name)
-        h2_conv4 = batch_norm(h2_conv4, 128)
+        #h2_conv4 = batch_norm(h2_conv4, 128)
 
     # upsampling from height 2 to height 2 and feed height 1 forward
     with tf.variable_scope('up3') as scope:
@@ -407,7 +412,7 @@ def inference(voxel_regions):
         up3 = tf.nn.relu(sums, name=scope.name)
         up3_concat = tf.concat_v2(values=[h1_conv2, up3], axis=4)
         #up3_concat = tf.concat(values=[h1_conv2, up3], concat_dim=4)
-        up3_concat = batch_norm(up3_concat, 128)
+        #up3_concat = batch_norm(up3_concat, 128)
 
     # height 1, convolution 3
     with tf.variable_scope('h1_conv3') as scope:
@@ -416,7 +421,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h1_conv3 = tf.nn.relu(sums, name=scope.name)
-        h1_conv3 = batch_norm(h1_conv3, 64)
+        #h1_conv3 = batch_norm(h1_conv3, 64)
 
     # height 1, convolution 4
     with tf.variable_scope('h1_conv4') as scope:
@@ -425,7 +430,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h1_conv4 = tf.nn.relu(sums, name=scope.name)
-        h1_conv4 = batch_norm(h1_conv4, 64)
+        #h1_conv4 = batch_norm(h1_conv4, 64)
 
     # upsampling from height 1 to height 0 and feed height 0 forward
     with tf.variable_scope('up4') as scope:
@@ -437,7 +442,7 @@ def inference(voxel_regions):
         up4 = tf.nn.relu(sums, name=scope.name)
         up4_concat = tf.concat_v2(values=[h0_conv2, up4], axis=4)
         #up4_concat = tf.concat(values=[h0_conv2, up4], concat_dim=4)
-        up4_concat = batch_norm(up4_concat, 64)
+        #up4_concat = batch_norm(up4_concat, 64)
 
     # height 0, convolution 3
     with tf.variable_scope('h0_conv3') as scope:
@@ -446,7 +451,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h0_conv3 = tf.nn.relu(sums, name=scope.name)
-        h0_conv3 = batch_norm(h0_conv3, 32)
+        #h0_conv3 = batch_norm(h0_conv3, 32)
 
     # height 0, convolution 4
     with tf.variable_scope('h0_conv4') as scope:
@@ -455,7 +460,7 @@ def inference(voxel_regions):
         biases = variable_on_cpu('biases', [32], tf.constant_initializer(0.0))
         sums = tf.nn.bias_add(conv, biases)
         h0_conv4 = tf.nn.relu(sums, name=scope.name)
-        h0_conv4 = batch_norm(h0_conv4, 32)
+        #h0_conv4 = batch_norm(h0_conv4, 32)
 
     # output, logits
     with tf.variable_scope('logits') as scope:

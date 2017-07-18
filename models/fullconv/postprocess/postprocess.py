@@ -1,4 +1,5 @@
 import math
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage
@@ -47,6 +48,10 @@ def save_pre_post_given_mask(iml, i, mask, savetag):
 
 def save_true_and_mask(iml, i, mask, savetag):
         img, img_labels = get_img_and_labels(iml, i)
+
+        # Create directory to save pictures in if neccessary.
+        directory = '../../../../pictures/{0}/img{1}'.format(savetag, i)
+        make_dir_if_needed(directory)
 
         for d in range(20):
             if (d % 5 == 0):
@@ -200,13 +205,20 @@ def dsc(pred_labs, labs):
     dice_coeff = np.true_divide(numerator, denominator)
     return dice_coeff
 
+def make_dir_if_needed(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
 if __name__ == '__main__':
 
     # load all images and labels
-    iml = np.load('../../../../data/datasets/images_and_labels.npy')
+    iml = np.load('../../../../data/datasets/images_and_labels_expanded.npy')
     #imgn = 1
-    tag = 'fullimg_4_571'
-    for imgn in range(8):
+    tag = 'fullimg_expanded'
+    directory = '../../../../pictures/{0}'.format(tag)
+    make_dir_if_needed(directory)
+    val_ids = [0,1,2,3,54,55,56,57,58,59,60]
+    for imgn in val_ids:
         mask = load_preds(imgn, tag)
         save_true_and_mask(iml, imgn, mask, tag)
         print(dsc(mask, iml[imgn,1,:,:,:])) 
