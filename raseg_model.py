@@ -7,7 +7,7 @@ import raseg_input
 # flags
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_boolean('use_fp16', False, """Train model using 16-bit floating point.""")
-tf.app.flags.DEFINE_string('data_dir', '../../../data/datasets/bins', """Directory to the data binaries""")
+tf.app.flags.DEFINE_string('data_dir', 'datasets/bins', """Directory to the data binaries""")
 tf.app.flags.DEFINE_integer('batch_size', 1, """Number of voxel regions in our batch.""")
 
 # constants
@@ -165,10 +165,10 @@ def activation_summary(x):
     tf.summary.histogram(x.op.name + '/activations', x)
     tf.summary.scalar(tensor_name + 'sparsity', tf.nn.zero_fraction(x))
 
-def distorted_inputs():
+def distorted_inputs(tag):
   """Construct input for evaluation using the Reader ops.
   Args:
-    eval_data: bool, indicating if one should use the train or eval data set.
+    tag: Tag to identify the data set. 
   Returns:
     images: Images. 5D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH, NCHANNELS] size.
     labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.
@@ -178,14 +178,14 @@ def distorted_inputs():
 
   if not FLAGS.data_dir:
     raise ValueError('Please supply a data_dir')
-  images, labels = raseg_input.distorted_inputs(data_dir=FLAGS.data_dir, batch_size=FLAGS.batch_size)
+  images, labels = raseg_input.distorted_inputs(data_dir=FLAGS.data_dir, batch_size=FLAGS.batch_size, tag=tag)
 
   if FLAGS.use_fp16:
     images = tf.cast(images, tf.float16)
     labels = tf.cast(labels, tf.float16)
   return images, labels
 
-def inputs(eval_data):
+def inputs(eval_data, tag):
   """Construct input for evaluation using the Reader ops.
   Args:
     eval_data: bool, indicating if one should use the train or eval data set.
@@ -200,7 +200,8 @@ def inputs(eval_data):
     raise ValueError('Please supply a data_dir')
   images, labels = raseg_input.inputs(eval_data=eval_data,
                                         data_dir=FLAGS.data_dir,
-                                        batch_size=FLAGS.batch_size)
+                                        batch_size=FLAGS.batch_size,
+					tag=tag)
   if FLAGS.use_fp16:
     images = tf.cast(images, tf.float16)
     labels = tf.cast(labels, tf.float16)

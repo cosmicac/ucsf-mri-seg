@@ -10,8 +10,8 @@ PATCH_DEPTH = 20
 NCHANNELS = 2
 
 NUM_CLASSES = 2
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 50
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 11
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 51
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10
 
 def read_train_bin(filename_queue):
   """Reads and parses patches from training data files.
@@ -112,6 +112,7 @@ def inputs(eval_data, data_dir, batch_size, tag):
     eval_data: bool, indicating if one should use the train or eval data set.
     data_dir: Path to the data directory.
     batch_size: Number of images per batch.
+    tag: Tag to identify the dataset.
  Returns:
     images: Images. 5D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH, NCHANNELS] size.
     labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.
@@ -185,6 +186,7 @@ def distorted_inputs(data_dir, batch_size, tag):
   Args:
     data_dir: Path to the data directory.
     batch_size: Number of images per batch.
+    tag: Tag to identify the dataset.
   Returns:
     images: Images. 5D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH, NCHANNELS] size.
     labels: Labels. 4D tensor of [batch_size, PATCH_HEIGHT, PATCH_WIDTH, PATCH_DEPTH] size.

@@ -1,11 +1,16 @@
+import argparse
 from datetime import datetime
 import time
 import tensorflow as tf
 import raseg_model
 
-FLAGS = tf.app.flags.FLAGS
+parser = argparse.ArgumentParser(description='Trains a raseg model.')
+parser.add_argument('-t', '--tag', help='Tag to identify the dataset.', required=True)
+args = vars(parser.parse_args())
+TAG = args['tag']
 
-tf.app.flags.DEFINE_string('train_dir', '../../../models/raseg_train_fullimg_expanded',
+FLAGS = tf.app.flags.FLAGS
+tf.app.flags.DEFINE_string('train_dir', 'models/raseg_train_{0}'.format(TAG),
                            """Directory where to write event logs """
                            """and checkpoint.""")
 tf.app.flags.DEFINE_integer('max_steps', 1000000,
@@ -14,14 +19,13 @@ tf.app.flags.DEFINE_boolean('log_device_placement', False,
                             """Whether to log device placement.""")
 tf.app.flags.DEFINE_boolean('train_from_checkpoint', False, """Whether to train from latest checkpoint""")
 
-
 def train():
   """Train model for a number of steps."""
   with tf.Graph().as_default():
     global_step = tf.contrib.framework.get_or_create_global_step()
 
     # Get images and labels
-    images, labels = raseg_model.distorted_inputs()
+    images, labels = raseg_model.distorted_inputs(TAG)
 
     # Build a Graph that computes the logits predictions from the
     # inference model.
