@@ -28,7 +28,7 @@
 \begin{document}
 \maketitle
 
-\noindent \textbf{Abstract.} Quantifying  synovitis legions in Magnetic Resonance (MR) images of patients with Rheumatoid Arthritis (RA) is an important tool for diagnosis and treatment of RA. Manual segmentation of lesions is costly due to both the complex positioning of the lesions and the size of the MR volumes. In this work, we present an automatic segmentation method using a fully-convolutional Convolutional Neural Network (CNN) with an encoder-decoder architecture. The network is trained end-to-end from 51 $512 \times 512 \times 20$ MR volumes and outputs a voxel-wise segmentation of the input volume. Furthermore, we train with a loss function based on Dice coefficient to deal with class-imbalance. We find that the network performs with an average dice coefficient of $0.61$ on a test set. The implementation and code are available at \url{https://github.com/cosmicac/ucsf-mri-seg.} 
+\noindent \textbf{Abstract.} Quantifying synovitis legions in Magnetic Resonance (MR) images of patients with Rheumatoid Arthritis (RA) is an important tool for diagnosis and treatment of RA. Manual segmentation of lesions is costly due to both the complex positioning of the lesions and the size of the MR volumes. In this work, we present an automatic segmentation method using a fully-convolutional Convolutional Neural Network (CNN) with an encoder-decoder architecture. The network is trained end-to-end from 51 $512 \times 512 \times 20$ MR volumes and outputs a voxel-wise segmentation of the input volume. Furthermore, we train with a loss function based on Dice coefficient to deal with class-imbalance. We find that the network performs with an average dice coefficient of $0.61$ on a test set. The implementation and code are available at \url{https://github.com/cosmicac/ucsf-mri-seg.} 
 
 \section{Introduction}
 
@@ -44,8 +44,9 @@ In this work, we present a CNN with a 3D encoder-decoder architecture to automat
 
 \section{Materials}
 
-Our dataset consists of 32 MRI volumes of dimension $512 \times 512 \times 20$ from 16 patients at various timepoints. These volumes are available in 3 sequences: a T1-weighted pre-gadolinium injection sequence, a T1-weighted post-gadolinium injection sequence, and T2-weighted sequence. The two T1-weighted sequences form the two input channels for our synovitis segmentation network, while the T2-weighted sequence forms the input channel for our BME segmentation network. We split up our dataset into 24 volumes for the training set and 8 volumes for a validation set. 
+Our dataset consists of 61 MRI volumes of dimension $512 \times 512 \times 20$ from 31 patients at various timepoints. These volumes are available in both a T1-weighted pre-gadolinium injection sequence and a T1-weighted post-gadolinium injection sequence. The two T1-weighted sequences form the two input channels for our synovitis segmentation network. We split up our dataset into 51 volumes for training/validation use and 10 volumes for a test set. 
 
+\newpage
 \section{Method}
 \begin{figure}
 \includegraphics[width=\textwidth]{figures/fig2.png}
@@ -53,30 +54,69 @@ Our dataset consists of 32 MRI volumes of dimension $512 \times 512 \times 20$ f
 \end{figure}
 
 \subsection{Architecture}
-Figure 1 gives a visual representation of our network architecture. The left half of the network is downsampling to learn an encoding, while the right half of the network decodes the learned encoding and outputs a segmentation mask at the end.
+Figure 1 gives a visual representation of our network architecture. The left half of the network is downsampling to learn an encoding, while the right half of the network decodes the learned encoding and outputs a segmentation mask at the end. There are 26 convolutional layers in total.
 
-The network consists of four layers in terms of spatial dimensions, each one half the size of the previous layer. Each layer consists of two convolutional layers. Convolutions within layers have stride of 1 and are padded to preserve the same dimensions. On the left side of the network, $2 \times 2 \times 2$ convolutions with stride 2 are are used to downsample between layers, whereas on the right side, $2 \times 2 \times 2$ transposed convolutions with stride 2 are used to learn an upsampling. In the first layer, the kernel size of the convolutions is $5 \times 5 \times 5$ in order to capture more complex features on the lowest level of th e heirarchy of features. Within all the other layers, kernels of size $3 \times 3 \times 3$ are employed. All convolutional layers are equipped with ReLU non-linearities.
+The network consists of five layers in terms of spatial dimensions, each one half the size of the previous layer. Each layer consists of two convolutional layers. Convolutions within layers have stride of 1 and are padded to preserve the same dimensions. On the left side of the network, $2 \times 2 \times 2$ convolutions with stride 2 are are used to downsample between layers, whereas on the right side, $2 \times 2 \times 2$ transposed convolutions with stride 2 are used to learn an upsampling. In the first layer, the kernel size of the convolutions is $5 \times 5 \times 5$ in order to capture more complex features on the lowest level of th e heirarchy of features. Within all the other layers, kernels of size $3 \times 3 \times 3$ are employed. All convolutional layers are equipped with ReLU non-linearities. A batch normalization is used after every convolutional layer.
 
 As with a standard CNN, the receptive field of filters in consecutive layers is increased linearly within layers, and doubled when moving down a layer. Since the spatial dimensions are halved when moving down a layer, we can double the number of filters. Likewise, the spatial dimensions are doubled when moving up a layer so the number of filters is halved.   
 
 Learning an upsampling or interpolation scheme on the right side of the network can result in coarseoutlines and segmentations due to loss of detailed information on the left side encoding path. To help deal with this, we employ fine grained feature forwarding from each level on the left side to the corresponding level on the right side, like many previous works \hyperref[noh]{[5,6,7,8]}. This allows for a more precise upsampling to be learned from the transposed convolutions. 
 
-In the final convolutional layer on the right side, we employ a two filters with kernel size of $1 \times 1 \times 1$ in order to output our two volumes of logits, each with the same spatial dimension as the input ($128 \times 128 \times 16$), one for each class. These logits are then passed to a softmax operation to extract our final class probabilities for each voxel. 
+In the final convolutional layer on the right side, we employ a two filters with kernel size of $1 \times 1 \times 1$ in order to output our two volumes of logits, each with the same spatial dimension as the input ($512 \times 512 \times 20$), one for each class. These logits are then passed to a softmax operation to extract our final class probabilities for each voxel. 
 
 \subsection{Training}
 
-We train with a loss function based on Dice coefficient as follows, where $P$ is the length $N$ ($N = 128 \times 128 \times 16$) vector of predicted probabilites (output of softmax), $Y$ is the length $N$ vector of binary ground truth labels, and $\gamma$ is a small smoothing factor:
+We train with a loss function based on Dice coefficient as follows, where $P$ is the length $N$ ($N = 512 \times 512 \times 20$) vector of predicted probabilites (output of softmax) and $Y$ is the length $N$ vector of binary ground truth labels.
 
 \begin{align*}
-D = \frac{2\sum_{i}^{N}p_iy_i + \gamma}{\sum_{i}^{N}p_i + \sum_{i}^{N}y_i + \gamma}
+D = \frac{2\sum_{i}^{N}p_iy_i}{\sum_{i}^{N}p_i + \sum_{i}^{N}y_i + \gamma}
 \end{align*}
 
 Note that $p_i \in P$ are the raw probabilities and not the binary predictions that would be used to calculate the Dice coefficient when evaluating accuracy - this is because a non-differentiable $argmax$ operation would be neccessary to extract the predictions from the probabilities, which would prevent gradient calculation by the optimizer. 
 
-We train using the Adam optimizer with initial learning rate $\alpha = 1e-03$, $\beta_1 = 0.9$, $\beta_2 = 0.999$, and $epsilon =1e-04$. We use batch size of $8$ and decay the learning rate by a factor of $0.25$ every $10$ epochs. 
+We train using the Adam optimizer with initial learning rate $\alpha = 1e-04$, $\beta_1 = 0.9$, $\beta_2 = 0.999$, and $epsilon =1e-04$. We use batch size of $1$ and decay the learning rate by a factor of $0.15$ every $4$ epochs. The small batch size of 1 was found neccessary due to memory limitations.
 
+We implemented the model in Python using Tensorflow. We trained for 18 hours on a Nvidia K80 GPU with 12GB of VRAM, but found that the model converged in less than 10 hours.  
+
+\newpage
 \section{Results}
+
+We obtain an average Dice coefficient of 0.613 ($\pm$ 0.078) across a test set of 10 images, compared against a manual ground-truth segmentation done by a radiologist.
+
+Qualititavely, the model appears to have learned the general position of synovitis (i.e. the synovial membranes between wrist bones). It produces best results when the synovitis is contained to within the center of the volume, such as in \textit{Patient 3, slice 6} of \textbf{Figure 2.}. The model is able to detect many small patches of synovitis, with respectable granularity - it is not limited to big, continuous patches. 
+
+The model fails to detect some synovitis outside of the center of the volume and performs worse, such as in \textit{Patient 9, depth 6} of \textbf{Figure 2.}, where there is a large area of synovitis in the tendon. We notice that in this case the model also detects synovitis in the center membranes where there is none. Another shortcoming we noticed is that the model seems poor at detecting long, thin patches of synovitis, as is the case in \textit{Patient 10, depth 4} of \textbf{Figure 2.}. This is a known weakness of CNNs.  
+
+The raw Dice Coefficients on the test patients are available in \textbf{Table 1.}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{figures/fig3.png}
+\caption{Four slices of four volumes from the test set. The model's predicted segmentations are on top, while the ground truth segmentations are below.}
+\end{figure}
+
+\begin{center}
+  \begin{tabular}{ | l | r | }
+  	\hline
+  	\text{Patient} & \text{Dice Coefficient} \\
+    \hline
+    1 & 0.558 \\ \hline
+    2 & 0.675 \\ \hline
+    3 & 0.682 \\ \hline
+    4 & 0.651 \\ \hline
+    5 & 0.615 \\ \hline
+    6 & 0.616 \\ \hline
+    7 & 0.680 \\ \hline
+    8 & 0.562 \\ \hline
+    9 & 0.433 \\ \hline
+    10 & 0.655 \\ \hline
+  \end{tabular} \\ 
+  \leavevmode
+  \\
+  \textbf{Table 1}. The raw Dice coefficents on a test set of 10 volumes.
+\end{center}
+
 \section{Conclusion}
+We presented an approach to automatically and accurately segmenting synovitis lesions using a convolutional neural network. Our network had a symmetric, end-to-end, "encoding-decoding" architecture, consisting of 26 convolutional layers in total. The left side of the network downsamples the input volume from $512 \times 512 \times 20$ to $32 \times 32 \times 2$, while the right side of the network upsamples back to a $512 \times 512 \times 20$ segmentation. We trained with a loss function based on the Dice coefficient, which was found to help with class imbalance. While we arrived at promising results with our model, future work can look to improve performance and segment other types of lesions as well.
 
 \newpage
 \section*{References}
