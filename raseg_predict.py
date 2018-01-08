@@ -1,5 +1,6 @@
 from __future__ import division
 import os
+import argparse
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -56,14 +57,14 @@ def save_true_and_mask(iml, i, mask, savetag):
         for d in range(20):
             if (d % 5 == 0):
               print(d)
-            overlay_mask_and_save(img[:,:,d], img_labels[:,:,d], '../../../../pictures/{0}/img{1}/img{2}d{3}_{4}_true'.format(savetag, i, i, d, savetag))
-            overlay_mask_and_save(img[:,:,d], mask[:,:,d], '../../../../pictures/{0}/img{1}/img{2}d{3}_{4}_pred'.format(savetag, i, i, d, savetag))
+            overlay_mask_and_save(img[:,:,d], img_labels[:,:,d], 'pictures/{0}/img{1}/img{2}d{3}_{4}_true.png'.format(savetag, i, i, d, savetag))
+            overlay_mask_and_save(img[:,:,d], mask[:,:,d], 'pictures/{0}/img{1}/img{2}d{3}_{4}_pred.png'.format(savetag, i, i, d, savetag))
 
 def predict():
 
     # load images, both channels
-    images_and_labels = np.load('datasets/images_and_labels_{0}.npy'.format(TAG))
-    pre_images = np.load('datasets/pre_images_{0}.npy'.format(TAG))
+    images_and_labels = np.load('datasets/images_and_labels.npy')
+    pre_images = np.load('datasets/pre_images.npy')
   
     img = images_and_labels[FLAGS.imgn,0,:,:,:]
     pre_img = pre_images[FLAGS.imgn,:,:,:]
@@ -108,7 +109,7 @@ def predict():
     final_mask = preds.reshape((512,512,20))
     make_dir_if_needed('preds/{0}'.format(TAG))
     np.save('preds/{0}/img{1}_{2}'.format(TAG, FLAGS.imgn, TAG), final_mask)
-    save_true_and_mask(images_and_labels, FLAGs.imgn, final_mask, TAG)
+    save_true_and_mask(images_and_labels, FLAGS.imgn, final_mask, TAG)
     return final_mask
 
 def main(argv=None):  # pylint: disable=unused-argument

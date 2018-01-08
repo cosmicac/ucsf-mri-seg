@@ -1,9 +1,10 @@
 import argparse
+import os
 import numpy as np 
 
 parser = argparse.ArgumentParser(description='Takes in datasets in npy format and outputs binaries to train on.')
 parser.add_argument('-t','--tag', help='Tag to identify the dataset.', required=True)
-parser.add_argument('-v','--val', help='Desired size of the validation set.', required=True)
+parser.add_argument('-v','--val', type=int, help='Desired size of the validation set.', required=True)
 args = vars(parser.parse_args())
 
 def flatten_and_bin(imgs, labels, save_path):
@@ -23,13 +24,13 @@ def flatten_and_bin(imgs, labels, save_path):
 def make_fc_fullimg_dataset(tag, val_size):
 
     # load images and labels
-    images_and_labels = np.load('datasets/images_and_labels_{0}.npy'.format(tag))
-    pre_images = np.load('datasets/pre_images_{0}.npy'.format(tag))
+    images_and_labels = np.load('datasets/images_and_labels.npy')
+    pre_images = np.load('datasets/pre_images.npy')
 
     assert pre_images.shape[0] == images_and_labels.shape[0]
 
     # validation set
-    n_before_val = pre_image.shape[0]
+    n_before_val = pre_images.shape[0]
     ids = np.arange(n_before_val-val_size)
     images_and_labels = images_and_labels[ids,:,:,:,:]
     pre_images = pre_images[ids,:,:,:]
@@ -59,6 +60,9 @@ def make_fc_fullimg_dataset(tag, val_size):
     labels4 = labels[3*bs:4*bs,:,:,:]
     labels5 = labels[4*bs:,:,:,:]
     
+    if not os.path.exists('datasets/bins'):
+        os.makedirs('datasets/bins')
+
     flatten_and_bin(imgs1, labels1, 'datasets/bins/train_and_label_{0}_batch_1.bin'.format(tag))
     flatten_and_bin(imgs2, labels2, 'datasets/bins/train_and_label_{0}_batch_2.bin'.format(tag))
     flatten_and_bin(imgs3, labels3, 'datasets/bins/train_and_label_{0}_batch_3.bin'.format(tag))
@@ -66,6 +70,6 @@ def make_fc_fullimg_dataset(tag, val_size):
     flatten_and_bin(imgs5, labels5, 'datasets/bins/train_and_label_{0}_batch_5.bin'.format(tag))
 
 if __name__ == '__main__':
-    tag, val_size = args['tag'], args['val_size']
-    make_fc_fullimg_expanded_dataset(tag, val_size)
+    tag, val_size = args['tag'], args['val']
+    make_fc_fullimg_dataset(tag, val_size)
 	
