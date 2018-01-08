@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is an implementation of a fully convolutional CNN for segmenting synovitis in wrist MRIs of patients with Rheumatoid Arthritis, in Tensorflow. The network is trained end-to-end on 512 x 512 x 20 MR volumes and outpus a voxel-wise segmentation of the input volume. It's trained using dice coefficient as a loss function and performs with an average dice coefficient of 0.61 on a test set of 10 MR volumes from UCSF patients. Check out the [paper](https://github.com/cosmicac/ucsf-mri-seg/blob/refactor/paper/raseg.pdf) for more details.
+This is an implementation of a fully convolutional CNN for segmenting synovitis in wrist MRIs of patients with Rheumatoid Arthritis, in Tensorflow. The network is trained end-to-end on 512 x 512 x 20 MR volumes and outputs a voxel-wise segmentation of the input volume. It's trained using dice coefficient as a loss function and performs with an average dice coefficient of 0.61 on a test set of 10 MR volumes from UCSF patients. Check out the [paper](https://github.com/cosmicac/ucsf-mri-seg/blob/refactor/paper/raseg.pdf) for more details.
 
 ## Architecture
 
